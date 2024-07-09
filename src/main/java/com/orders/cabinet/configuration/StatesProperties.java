@@ -6,24 +6,16 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Primary;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-
 @Component
-@ConfigurationProperties(prefix = "pop-order")
+@ConfigurationProperties(prefix = "state")
 @Getter
 @Setter
 @Primary
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PopOrderProperties {
-
-    String url;
-    String pop;
-    String upd;
-    String agent;
-    long rate;
-
+public class StatesProperties {
+    String cancel;
+    String confirm;
+    String comlete;
 }

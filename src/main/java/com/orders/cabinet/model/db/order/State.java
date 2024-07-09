@@ -35,6 +35,6 @@ public class State extends BaseEntity{
     @Column(name = "cancel_reason")
     String reason;
 
-    @OneToMany(mappedBy = "state", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "state", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     List<PrepsInOrderDb> prepsInOrder;
 }

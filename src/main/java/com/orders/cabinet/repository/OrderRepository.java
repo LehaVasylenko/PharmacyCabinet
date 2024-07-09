@@ -9,14 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<OrderDb, Long> {
-    @Query("SELECT DISTINCT o " +
+    @Query("SELECT o " +
             "FROM OrderDb o " +
-            "JOIN FETCH o.states s " +
-            "JOIN FETCH s.prepsInOrder p " +
-            "WHERE s.state = 'New' AND o.shop.shopId = :shopId " +
-            "GROUP BY o.id " +
-            "HAVING COUNT(DISTINCT s.state) = 1")
-    Optional<List<OrderDb>> findOrdersWithOnlyNewStateForShop(@Param("shopId") String shopId);
+            "JOIN FETCH o.states s")
+    List<OrderDb> findAllOrders();
 
     @Query("SELECT o FROM OrderDb o " +
             "JOIN FETCH o.shop s " +

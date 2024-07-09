@@ -39,6 +39,6 @@ public class OrderDb extends BaseEntity{
     @Column(name = "shipping")
     String shipping;
 
-    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     List<State> states;
 }

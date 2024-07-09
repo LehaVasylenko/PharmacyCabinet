@@ -3,6 +3,7 @@ package com.orders.cabinet.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orders.cabinet.configuration.PopOrderProperties;
+import com.orders.cabinet.configuration.StatesProperties;
 import com.orders.cabinet.event.OrderReceivedEvent;
 import com.orders.cabinet.mapper.OrderMapper;
 import com.orders.cabinet.model.api.Order;
@@ -56,11 +57,7 @@ public class UpdateOrderService {
     PrepsInOrderRepository prepsInOrderRepository;
     ShopRepository shopRepository;
 
-    String path = "/upd-order";
-    Integer OK = 201;
-    String CANCEL = "Canceled";
-    String COMPLETED = "Completed";
-    String CONFIRMED = "Confirmed";
+    StatesProperties states;
     Map<String, List<Order>> orderMap = new HashMap<>();
     OrderWriterService orderWriterService;
 
@@ -93,11 +90,11 @@ public class UpdateOrderService {
     @Async
     public CompletableFuture<?> confirmOrder(String shopId, ControllerDTO controllerDto) {
         //try {
-            Order newOrder = getNewState(shopId, controllerDto, CONFIRMED);
+            Order newOrder = getNewState(shopId, controllerDto, states.getConfirm());
 
             doPartyHard(newOrder);
             saveIt(newOrder);
-            return CompletableFuture.completedFuture(CONFIRMED);
+            return CompletableFuture.completedFuture(states.getConfirm());
 //        } catch (Exception e) {
 //            return CompletableFuture.failedFuture(e);
 //        }
@@ -106,12 +103,12 @@ public class UpdateOrderService {
     @Async
     public CompletableFuture<?> completeOrder(String shopId, ControllerDTO controllerDto) {
         try {
-            Order newOrder = getNewState(shopId, controllerDto, COMPLETED);
+            Order newOrder = getNewState(shopId, controllerDto, states.getComlete());
 
             doPartyHard(newOrder);
             saveIt(newOrder);
 
-            return CompletableFuture.completedFuture(COMPLETED);
+            return CompletableFuture.completedFuture(states.getComlete());
         } catch (Exception e) {
             return CompletableFuture.failedFuture(e);
         }
@@ -120,13 +117,13 @@ public class UpdateOrderService {
     @Async
     public CompletableFuture<?> cancelOrder(String shopId, ControllerDTO controllerDto) {
         try {
-            Order newOrder = getNewState(shopId, controllerDto, CANCEL);
+            Order newOrder = getNewState(shopId, controllerDto, states.getCancel());
             newOrder.setReason(controllerDto.getReason());
 
             doPartyHard(newOrder);
             saveIt(newOrder);
 
-            return CompletableFuture.completedFuture(CANCEL);
+            return CompletableFuture.completedFuture(states.getCancel());
         } catch (Exception e) {
             return CompletableFuture.failedFuture(e);
         }
@@ -157,7 +154,7 @@ public class UpdateOrderService {
             String response = "";
             do {
                 try {
-                    String url = properties.getUrl() + path;
+                    String url = properties.getUrl() + properties.getUpd();
                     String requestBodyJson = objectMapper.writeValueAsString(newOrder);
                     HttpEntity<String> entity = new HttpEntity<>(requestBodyJson,
                             getHttpHeaders(corp.get().getLogin(), corp.get().getPassword()));
@@ -183,12 +180,12 @@ public class UpdateOrderService {
         if (tempOrder.isPresent()) {
             OrderDb oldOrder = tempOrder.get();
             State lastState = oldOrder.getStates().get(oldOrder.getStates().size() - 1);
-            if (lastState.getState().equals(CANCEL) || lastState.getState().equals(COMPLETED))
-                throw new NoSuchElementException("States '" + CANCEL + "' or '" + COMPLETED + "' can't be changed!");
+            if (lastState.getState().equals(states.getCancel()) || lastState.getState().equals(states.getComlete()))
+                throw new NoSuchElementException("States '" + states + "' or '" + states.getComlete() + "' can't be changed!");
 
             List<OrderPreps> preps = new ArrayList<>();
             for (int i = 0; i < controllerDTO.getConfirmedPreps().size(); i++) {
-                if (state.equals(CANCEL)) preps.add(addPrep(controllerDTO, lastState, i));
+                if (state.equals(states.getCancel())) preps.add(addPrep(controllerDTO, lastState, i));
                 else {
                     if (controllerDTO.getConfirmedPreps().get(i).isConfirmed()) {
                         preps.add(addPrep(controllerDTO, lastState, i));

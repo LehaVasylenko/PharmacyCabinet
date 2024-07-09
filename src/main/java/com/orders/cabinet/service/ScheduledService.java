@@ -79,7 +79,7 @@ public class ScheduledService {
     }
 
     private void doFuckingMagic(ShopsDTO shop) throws InterruptedException, ExecutionException, JsonProcessingException {
-        String url = properties.getUrl() + "/pop-order";
+        String url = properties.getUrl() + properties.getPop();
         CorpDTO temp = null;
         if (corps.containsKey(shop.getCorpId())) {
             temp = corps.get(shop.getCorpId());
