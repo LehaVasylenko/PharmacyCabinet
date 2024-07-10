@@ -31,6 +31,6 @@ public class Corp {
     @Column(name = "life_time")
     Integer lifeTime;
 
-    @OneToMany(mappedBy = "corp")
+    @OneToMany(mappedBy = "corp", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Shops> shops;
 }

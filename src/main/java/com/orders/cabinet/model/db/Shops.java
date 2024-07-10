@@ -30,6 +30,6 @@ public class Shops {
     @JoinColumn(name = "corp_id", nullable = false)
     Corp corp;
 
-    @OneToMany(mappedBy = "shop")
+    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
     List<OrderDb> orders;
 }

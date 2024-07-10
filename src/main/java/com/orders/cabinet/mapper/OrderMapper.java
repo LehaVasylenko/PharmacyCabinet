@@ -32,7 +32,7 @@ public class OrderMapper {
                 .idOrder(orderDb.getOrderId())
                 .phone(orderDb.getPhone())
                 .time(getTime(orderDb.getTimestamp()))
-                .state(orderDb.getStates().get(0).getState())
+                .state(orderDb.getStates().get(orderDb.getStates().size() - 1).getState())
                 .data(getPrersDtoListFromDB(orderDb
                         .getStates()
                         .get(orderDb.getStates().size() - 1)

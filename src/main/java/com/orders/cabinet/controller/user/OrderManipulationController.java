@@ -41,6 +41,8 @@ public class OrderManipulationController {
                 .exceptionally(ex -> {
                     if (ex.getCause() instanceof SQLException) {
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getCause().getMessage());
+                    } else if (ex.getCause() instanceof NoSuchElementException) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getCause().getMessage());
                     } else {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
                     }
@@ -56,7 +58,7 @@ public class OrderManipulationController {
                     if (ex.getCause() instanceof SQLException) {
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getCause().getMessage());
                     } else if (ex.getCause() instanceof NoSuchElementException) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getCause().getMessage());
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getCause().getMessage());
                     } else {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
                     }
@@ -72,7 +74,7 @@ public class OrderManipulationController {
                     if (ex.getCause() instanceof SQLException) {
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getCause().getMessage());
                     } else if (ex.getCause() instanceof NoSuchElementException) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getCause().getMessage());
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getCause().getMessage());
                     } else {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
                     }

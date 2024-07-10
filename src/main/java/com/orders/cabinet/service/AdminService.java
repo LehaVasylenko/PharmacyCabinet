@@ -1,14 +1,17 @@
 package com.orders.cabinet.service;
 
 import com.orders.cabinet.exception.NoSuchShopException;
+import com.orders.cabinet.mapper.AdminMapper;
 import com.orders.cabinet.mapper.CorpMapper;
 import com.orders.cabinet.mapper.ShopMapper;
 import com.orders.cabinet.model.Role;
 import com.orders.cabinet.model.db.Corp;
 import com.orders.cabinet.model.db.Shops;
 import com.orders.cabinet.model.db.dto.AddShopDTO;
+import com.orders.cabinet.model.db.dto.AdminDTO;
 import com.orders.cabinet.model.db.dto.CorpDTO;
 import com.orders.cabinet.model.db.dto.ShopsDTO;
+import com.orders.cabinet.repository.AdminRepository;
 import com.orders.cabinet.repository.CorpRepository;
 import com.orders.cabinet.repository.ShopRepository;
 import lombok.AccessLevel;
@@ -16,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -32,7 +36,9 @@ public class AdminService {
 
     CorpRepository corpRepository;
     ShopRepository shopRepository;
+    AdminRepository adminRepository;
     ShopMapper shopMapper;
+    PasswordEncoder encoder;
 
 
     @Async
@@ -73,27 +79,40 @@ public class AdminService {
     }
 
     @Async
-    public void deleteCorp(String corpId) {
-
-        shopRepository.deleteByCorpId(corpId);
-        corpRepository.deleteById(corpId);
+    public CompletableFuture<String> deleteCorp(String corpId) {
+        try {
+            corpRepository.deleteById(corpId);
+            return CompletableFuture.completedFuture("OK");
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     @Async
-    public void editCorpById(String corpId, CorpDTO corpDto) {
-        if (corpDto.getLogin() != null) corpRepository.updateLogin(corpId, corpDto.getLogin());
-        if (corpDto.getPassword() != null) corpRepository.updatePassword(corpId, corpDto.getPassword());
-        if (corpDto.getCorpName() != null) corpRepository.updateCorpName(corpId, corpDto.getCorpName());
-        if (corpDto.getLifeTime() != null) corpRepository.updateLifeTime(corpId, corpDto.getLifeTime());
+    public CompletableFuture<String> editCorpById(String corpId, CorpDTO corpDto) {
+        try {
+            if (corpDto.getLogin() != null) corpRepository.updateLogin(corpId, corpDto.getLogin());
+            if (corpDto.getPassword() != null) corpRepository.updatePassword(corpId, corpDto.getPassword());
+            if (corpDto.getCorpName() != null) corpRepository.updateCorpName(corpId, corpDto.getCorpName());
+            if (corpDto.getLifeTime() != null) corpRepository.updateLifeTime(corpId, corpDto.getLifeTime());
+            return CompletableFuture.completedFuture(corpDto.toString());
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     @Async
-    public void editShopById(String shopId, String password) {
-        shopRepository.updatePassword(shopId, password);
+    public CompletableFuture<String> editShopById(String shopId, String password) {
+        try {
+            shopRepository.updatePassword(shopId, encoder.encode(password));
+            return CompletableFuture.completedFuture("OK");
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     @Async
-    public CompletableFuture<Void> saveShop(List<AddShopDTO> addShopDTO) throws SQLException {
+    public CompletableFuture<Void> saveShop(List<AddShopDTO> addShopDTO) {
         try {
             for (int i = 0; i < addShopDTO.size(); i++) {
                 Optional<Shops> exceptionShop = shopRepository.getShopByShopId(addShopDTO.get(i).getShopId());
@@ -115,28 +134,27 @@ public class AdminService {
     }
 
     @Async
-    public CompletableFuture<Void> saveAdmin(ShopsDTO shopsDTO) {
+    public CompletableFuture<?> saveAdmin(AdminDTO adminDTO) {
         try {
-            Optional<Shops> exceptionShop = shopRepository.getShopByShopId(shopsDTO.getShopId());
-            if (exceptionShop.isPresent()) throw new SQLException(shopsDTO.getShopId() + " already exists in base!");
-            Shops shop = shopMapper.toModel(shopsDTO);
-            Corp corp = corpRepository
-                    .getCorpByCorpId(shopsDTO.getCorpId())
-                    .orElseThrow(() -> new NoSuchShopException("Add " + shopsDTO.getCorpId() + " to DB at first!"));
-
-            shop.setRole(Role.ADMIN);
-            shop.setCorp(corp);
-
-            shopRepository.save(shop);
-            return CompletableFuture.completedFuture(null);
+            if (!adminRepository.existsByUsername(adminDTO.getUsername())) {
+                String rawPassword = adminDTO.getPassword();
+                adminDTO.setPassword(encoder.encode(rawPassword));
+                adminRepository.save(AdminMapper.INSTANCE.toModel(adminDTO));
+                return CompletableFuture.completedFuture("OK");
+            } else return CompletableFuture.failedFuture(new SQLException("Admin with such username already exists!"));
         } catch (Exception e) {
             return CompletableFuture.failedFuture(e);
         }
     }
 
     @Async
-    public void deleteShop (String shopId) {
-        shopRepository.deleteById(shopId);
+    public CompletableFuture<String> deleteShop (String shopId) {
+        try {
+            shopRepository.deleteById(shopId);
+            return CompletableFuture.completedFuture("OK");
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     @Async
@@ -150,12 +168,11 @@ public class AdminService {
 
     @Async
     public CompletableFuture<ShopsDTO> getShopById(String shopId) {
+        ShopsDTO dto = shopMapper.toDto(shopRepository.getShopByShopId(shopId)
+                        .orElseThrow(() -> new NoSuchShopException("No shop with ID: " + shopId + " was found!")));
+        dto.setPassword("******");
 
         return CompletableFuture
-                .completedFuture(shopMapper
-                .toDto(shopRepository
-                        .getShopByShopId(shopId)
-                        .orElseThrow(() -> new NoSuchShopException("No shop with ID: " + shopId + " was found!"))
-                ));
+                .completedFuture(dto);
     }
 }

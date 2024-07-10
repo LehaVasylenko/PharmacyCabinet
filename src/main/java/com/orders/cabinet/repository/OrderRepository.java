@@ -21,4 +21,9 @@ public interface OrderRepository extends JpaRepository<OrderDb, Long> {
 
     @Query("SELECT o FROM OrderDb o JOIN FETCH o.shop WHERE SIZE(o.states) = 1")
     List<OrderDb> findOrdersWithOnlyOneState();
+
+    @Query("SELECT o FROM OrderDb o " +
+            "JOIN FETCH o.shop s " +
+            "WHERE s.shopId = :shopId")
+    List<OrderDb> findByShopId(@Param("shopId") String shopId);
 }

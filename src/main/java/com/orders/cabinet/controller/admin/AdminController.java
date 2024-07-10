@@ -2,6 +2,7 @@ package com.orders.cabinet.controller.admin;
 
 import com.orders.cabinet.exception.NoSuchShopException;
 import com.orders.cabinet.model.db.dto.AddShopDTO;
+import com.orders.cabinet.model.db.dto.AdminDTO;
 import com.orders.cabinet.model.db.dto.CorpDTO;
 import com.orders.cabinet.model.db.dto.ShopsDTO;
 import com.orders.cabinet.service.AdminService;
@@ -20,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
+@RequestMapping("${main.module.admin.panel}")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminController {
@@ -39,14 +41,8 @@ public class AdminController {
                 });
     }
 
-    @PostMapping("/corp/edit/{corpId}")
-    public ResponseEntity<?> editCorp(@Valid @RequestBody CorpDTO corpDTO, @RequestParam String corpId) {
-        service.editCorpById(corpId, corpDTO);
-        return ResponseEntity.status(201).build();
-    }
-
     @PostMapping("${main.module.shops.add}")
-    public CompletableFuture<ResponseEntity<String>> addShop(@Valid @RequestBody List<AddShopDTO> shop) throws SQLException {
+    public CompletableFuture<ResponseEntity<String>> addShop(@Valid @RequestBody List<AddShopDTO> shop) {
         return service.saveShop(shop)
                 .thenApply(result -> ResponseEntity.status(201).body("Shops saved successfully"))
                 .exceptionally(ex -> {
@@ -60,9 +56,9 @@ public class AdminController {
                 });
     }
 
-    @PostMapping("/admin/add")
-    public CompletableFuture<ResponseEntity<String>> addAdmin(@Valid @RequestBody ShopsDTO shopsDTO) throws SQLException {
-        return service.saveAdmin(shopsDTO)
+    @PostMapping("${main.module.admin.add}")
+    public CompletableFuture<ResponseEntity<String>> addAdmin(@Valid @RequestBody AdminDTO adminDTO) {
+        return service.saveAdmin(adminDTO)
                 .thenApply(result -> ResponseEntity.status(201).body("Admin saved successfully"))
                 .exceptionally(ex -> {
                     if (ex.getCause() instanceof SQLException) {
@@ -73,5 +69,41 @@ public class AdminController {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
                     }
                 });
+    }
+
+    @PostMapping("${main.module.corps.edit}/{corpId}")
+    public CompletableFuture<ResponseEntity<String>> editCorp(@Valid @RequestBody CorpDTO corpDTO, @PathVariable String corpId) {
+
+        return service.editCorpById(corpId, corpDTO)
+                .thenApply(ResponseEntity::ok)
+                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage()));
+    }
+
+    @PostMapping("${main.module.shops.edit}/{shopId}")
+    public CompletableFuture<ResponseEntity<String>> editShop(@RequestBody String password, @PathVariable String shopId) {
+        return service.editShopById(shopId, password)
+                .thenApply(ResponseEntity::ok)
+                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage()));
+    }
+
+    @PostMapping("${main.module.shops.delete}")
+    public CompletableFuture<ResponseEntity<String>> deleteShop(@RequestBody String shopId) {
+        return service.deleteShop(shopId)
+                .thenApply(ResponseEntity::ok)
+                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage()));
+    }
+
+    @PostMapping("${main.module.corps.delete}")
+    public CompletableFuture<ResponseEntity<String>> deleteCorp(@RequestBody String corpId) {
+        return service.deleteCorp(corpId)
+                .thenApply(ResponseEntity::ok)
+                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage()));
+    }
+
+    @GetMapping("${main.module.shops.get}/{shopId}")
+    public CompletableFuture<ResponseEntity<ShopsDTO>> getByShopId(@PathVariable String shopId) {
+        return service.getShopById(shopId)
+                .thenApply(ResponseEntity::ok)
+                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 }
