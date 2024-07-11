@@ -1,10 +1,7 @@
 package com.orders.cabinet.controller.admin;
 
 import com.orders.cabinet.exception.NoSuchShopException;
-import com.orders.cabinet.model.db.dto.AddShopDTO;
-import com.orders.cabinet.model.db.dto.AdminDTO;
-import com.orders.cabinet.model.db.dto.CorpDTO;
-import com.orders.cabinet.model.db.dto.ShopsDTO;
+import com.orders.cabinet.model.db.dto.*;
 import com.orders.cabinet.service.AdminService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -42,16 +39,25 @@ public class AdminController {
     }
 
     @PostMapping("${main.module.shops.add}")
-    public CompletableFuture<ResponseEntity<String>> addShop(@Valid @RequestBody List<AddShopDTO> shop) {
+    public CompletableFuture<ResponseEntity<List<ShopInfoCacheDTO>>> addShop(@Valid @RequestBody List<AddShopDTO> shop) {
         return service.saveShop(shop)
-                .thenApply(result -> ResponseEntity.status(201).body("Shops saved successfully"))
+                .thenApply(result -> ResponseEntity.status(201).body(result))
                 .exceptionally(ex -> {
                     if (ex.getCause() instanceof SQLException) {
-                        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getCause().getMessage());
+                        return ResponseEntity.status(HttpStatus.CONFLICT).body(List.of(ShopInfoCacheDTO
+                                .builder()
+                                        .shopId(ex.getCause().getMessage())
+                                .build()));
                     } else if (ex.getCause() instanceof NoSuchShopException) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getCause().getMessage());
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of(ShopInfoCacheDTO
+                                .builder()
+                                .shopId(ex.getCause().getMessage())
+                                .build()));
                     } else {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of(ShopInfoCacheDTO
+                                .builder()
+                                .shopId(ex.getCause().getMessage())
+                                .build()));
                     }
                 });
     }

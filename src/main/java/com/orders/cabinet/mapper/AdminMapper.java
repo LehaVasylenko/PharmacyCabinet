@@ -1,9 +1,7 @@
 package com.orders.cabinet.mapper;
 
 import com.orders.cabinet.model.db.Admin;
-import com.orders.cabinet.model.db.Corp;
 import com.orders.cabinet.model.db.dto.AdminDTO;
-import com.orders.cabinet.model.db.dto.CorpDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
