@@ -1,11 +1,9 @@
 package com.orders.cabinet.model.db;
 
+import com.orders.cabinet.event.EntityAuditListener;
 import com.orders.cabinet.model.Role;
 import com.orders.cabinet.model.db.order.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EntityListeners(EntityAuditListener.class)
 public class Admin extends BaseEntity {
     String username;
     String password;

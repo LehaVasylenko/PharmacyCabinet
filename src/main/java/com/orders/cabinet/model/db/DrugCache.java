@@ -1,9 +1,7 @@
 package com.orders.cabinet.model.db;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.orders.cabinet.event.EntityAuditListener;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EntityListeners(EntityAuditListener.class)
 public class DrugCache {
     @Id
     @Column(name = "drug_id", unique = true, nullable = false)

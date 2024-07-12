@@ -1,5 +1,6 @@
 package com.orders.cabinet.model.db;
 
+import com.orders.cabinet.event.EntityAuditListener;
 import com.orders.cabinet.model.Role;
 import com.orders.cabinet.model.db.order.OrderDb;
 import jakarta.persistence.*;
@@ -13,8 +14,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"corp", "orders"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EntityListeners(EntityAuditListener.class)
 public class Shops {
     @Id
     @Column(name = "shop_id", unique = true)

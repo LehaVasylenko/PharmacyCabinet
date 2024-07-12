@@ -1,5 +1,6 @@
 package com.orders.cabinet.model.db.order;
 
+import com.orders.cabinet.event.EntityAuditListener;
 import com.orders.cabinet.model.db.Shops;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,8 +15,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"shop", "order", "prepsInOrder"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EntityListeners(EntityAuditListener.class)
 public class State extends BaseEntity{
 
     @ManyToOne

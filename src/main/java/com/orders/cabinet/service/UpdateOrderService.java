@@ -150,6 +150,7 @@ public class UpdateOrderService {
     private void doPartyHard(Order newOrder) {
         Optional<Corp> corp = shopRepository.findCorpByShopId(newOrder.getIdShop());
         boolean noContent = false;
+        boolean notEnought = true;
         if (corp.isPresent()) {
             ResponseEntity<String> response = null;
             do {
@@ -160,14 +161,18 @@ public class UpdateOrderService {
                             getHttpHeaders(corp.get().getLogin(), corp.get().getPassword()));
                     response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
                     log.info(response + ":\n" + requestBodyJson);
-                    if (response.getStatusCode() == HttpStatus.NO_CONTENT) noContent = true;
+                    if (response.getStatusCode() == HttpStatus.NO_CONTENT) {
+                        noContent = true;
+                        notEnought = false;
+                    }
+                    if (response.getStatusCode() == HttpStatus.OK) notEnought = false;
                 } catch (HttpClientErrorException ex) {
                     log.error(ex.getStatusCode() + ": " + ex.getMessage());
                 } catch (JsonProcessingException ex) {
                     log.error(ex.getMessage());
                 }
                 if (noContent) throw new OrderOutOfDateException("Order " + newOrder.getIdOrder() + " expired and canceled by Booking!");
-            } while (response.getStatusCode().is2xxSuccessful());
+            } while (notEnought);
         } else {
             log.error("Can't be sent: {}", newOrder);
         }

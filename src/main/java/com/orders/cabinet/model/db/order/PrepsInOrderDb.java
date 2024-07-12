@@ -1,5 +1,6 @@
 package com.orders.cabinet.model.db.order;
 
+import com.orders.cabinet.event.EntityAuditListener;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,8 +11,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Data
+@Getter
+@Setter
+@ToString(exclude = "state")
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EntityListeners(EntityAuditListener.class)
 public class PrepsInOrderDb extends BaseEntity{
 
     @ManyToOne
