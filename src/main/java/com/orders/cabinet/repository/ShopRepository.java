@@ -33,9 +33,11 @@ public interface ShopRepository extends JpaRepository<Shops, String> {
 //    @Query("UPDATE Shops s SET s.lastLogin = :lastLogin WHERE s.shopId = :shopId")
 //    void updateLastLogin(@Param("shopId") String shopId, @Param("lastLogin") Date lastLogin);
 //
-//    @Modifying
-//    @Transactional
-//    @Query("UPDATE Shops s SET s.loggedIn = :loggedIn WHERE s.shopId = :shopId")
-//    void updateLoggedIn(@Param("shopId") String shopId, @Param("loggedIn") Boolean loggedIn);
+    @Modifying
+    @Transactional
+    @Query("UPDATE Shops s SET s.logged = :loggedIn WHERE s.shopId = :shopId")
+    void updateLoggedIn(@Param("shopId") String shopId, @Param("loggedIn") Boolean loggedIn);
+
+    List<Shops> findAllByLoggedTrue();
 
 }

@@ -26,6 +26,9 @@ public class Shops {
     @Enumerated(EnumType.STRING)
     Role role;
 
+    @Column(name = "logged")
+    boolean logged;
+
     @ManyToOne
     @JoinColumn(name = "corp_id", nullable = false)
     Corp corp;

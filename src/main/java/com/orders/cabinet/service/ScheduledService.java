@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,6 +32,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
 
 @Service
 @Slf4j
@@ -50,7 +52,7 @@ public class ScheduledService {
     Map<String, CorpDTO> corps = new HashMap<>();
 
     private List<ShopsDTO> getAvailableShops() {
-        List<ShopsDTO> result = repo.findAll().stream().map(mapper::toDto).collect(Collectors.toList());
+        List<ShopsDTO> result = repo.findAllByLoggedTrue().stream().map(mapper::toDto).collect(Collectors.toList());
         log.info(result.toString());
         return result;
     }
@@ -93,9 +95,12 @@ public class ScheduledService {
         try {
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
             HttpEntity<String> entity = new HttpEntity<>(requestBodyJson, getHttpHeaders(temp.getLogin(), temp.getPassword()));
-            log.info(entity.toString());
-            Order[] response = restTemplate.exchange(url, HttpMethod.POST, entity, Order[].class).getBody();
 
+            log.info(entity.toString());
+            ResponseEntity<Order[]> exchange = restTemplate.exchange(url, HttpMethod.POST, entity, Order[].class);
+            log.info(exchange.toString());
+
+            Order[] response = exchange.getBody();
             if (response != null) {
                 eventPublisher.publishEvent(new OrderReceivedEvent(this, response));
             }
