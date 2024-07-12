@@ -11,7 +11,8 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<OrderDb, Long> {
     @Query("SELECT o " +
             "FROM OrderDb o " +
-            "JOIN FETCH o.states s")
+            "JOIN FETCH o.states s " +
+            "JOIN FETCH o.shop sh")
     List<OrderDb> findAllOrders();
 
     @Query("SELECT o FROM OrderDb o " +

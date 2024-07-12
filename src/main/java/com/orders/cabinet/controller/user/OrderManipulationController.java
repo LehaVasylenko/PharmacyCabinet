@@ -1,6 +1,7 @@
 package com.orders.cabinet.controller.user;
 
 
+import com.orders.cabinet.exception.OrderOutOfDateException;
 import com.orders.cabinet.model.api.dto.ControllerDTO;
 import com.orders.cabinet.model.api.dto.OrderDTO;
 import com.orders.cabinet.service.UpdateOrderService;
@@ -43,6 +44,8 @@ public class OrderManipulationController {
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getCause().getMessage());
                     } else if (ex.getCause() instanceof NoSuchElementException) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getCause().getMessage());
+                    } else if (ex.getCause() instanceof OrderOutOfDateException) {
+                        return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body(ex.getCause().getMessage());
                     } else {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
                     }
@@ -59,6 +62,8 @@ public class OrderManipulationController {
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getCause().getMessage());
                     } else if (ex.getCause() instanceof NoSuchElementException) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getCause().getMessage());
+                    } else if (ex.getCause() instanceof OrderOutOfDateException) {
+                        return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body(ex.getCause().getMessage());
                     } else {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
                     }
@@ -75,6 +80,8 @@ public class OrderManipulationController {
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getCause().getMessage());
                     } else if (ex.getCause() instanceof NoSuchElementException) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getCause().getMessage());
+                    } else if (ex.getCause() instanceof OrderOutOfDateException) {
+                        return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body(ex.getCause().getMessage());
                     } else {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
                     }

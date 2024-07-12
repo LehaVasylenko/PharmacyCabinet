@@ -5,8 +5,8 @@ package com.orders.cabinet.exception;
  * Author: Vasylenko Oleksii
  * Date: 29.05.2024
  */
-public class TokenExpiredException extends RuntimeException {
-    public TokenExpiredException(String message) {
+public class OrderOutOfDateException extends RuntimeException {
+    public OrderOutOfDateException(String message) {
         super(message);
     }
 }

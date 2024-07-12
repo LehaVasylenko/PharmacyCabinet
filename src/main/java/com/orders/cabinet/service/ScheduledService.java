@@ -99,6 +99,11 @@ public class ScheduledService {
             log.info(entity.toString());
             ResponseEntity<Order[]> exchange = restTemplate.exchange(url, HttpMethod.POST, entity, Order[].class);
             log.info(exchange.toString());
+            if (exchange.getBody() != null) {
+                for (Order order : exchange.getBody()) {
+                    log.info(order.toString());
+                }
+            }
 
             Order[] response = exchange.getBody();
             if (response != null) {

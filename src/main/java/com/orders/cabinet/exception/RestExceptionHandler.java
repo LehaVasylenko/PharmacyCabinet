@@ -54,8 +54,8 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 //
-    @ExceptionHandler(TokenExpiredException.class)
-    public ResponseEntity<String> handleTokenExpiredException(TokenExpiredException ex) {
+    @ExceptionHandler(OrderOutOfDateException.class)
+    public ResponseEntity<String> handleTokenExpiredException(OrderOutOfDateException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 

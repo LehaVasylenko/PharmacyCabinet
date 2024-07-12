@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CorpRepository extends JpaRepository<Corp, String> {
+
+    @Query("SELECT c.lifeTime FROM Corp c JOIN c.shops s JOIN s.orders o WHERE o.orderId = :orderId AND s.shopId = :shopId")
+    Integer findLifetimeByOrderIdAndShopId(@Param("orderId") String orderId, @Param("shopId") String shopId);
+
     @Query(value = "SELECT * FROM corp WHERE corp_id = ?1", nativeQuery = true)
     Optional<Corp> getCorpByCorpId(String idCorp);
 

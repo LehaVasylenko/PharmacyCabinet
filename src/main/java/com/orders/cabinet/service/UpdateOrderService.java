@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orders.cabinet.configuration.PopOrderProperties;
 import com.orders.cabinet.configuration.StatesProperties;
 import com.orders.cabinet.event.OrderReceivedEvent;
+import com.orders.cabinet.exception.OrderOutOfDateException;
 import com.orders.cabinet.mapper.OrderMapper;
 import com.orders.cabinet.model.api.Order;
 import com.orders.cabinet.model.api.OrderPreps;
@@ -25,9 +26,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -89,15 +88,15 @@ public class UpdateOrderService {
 
     @Async
     public CompletableFuture<?> confirmOrder(String shopId, ControllerDTO controllerDto) {
-        //try {
+        try {
             Order newOrder = getNewState(shopId, controllerDto, states.getConfirm());
 
             doPartyHard(newOrder);
             saveIt(newOrder);
             return CompletableFuture.completedFuture(states.getConfirm());
-//        } catch (Exception e) {
-//            return CompletableFuture.failedFuture(e);
-//        }
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     @Async
@@ -150,28 +149,27 @@ public class UpdateOrderService {
 
     private void doPartyHard(Order newOrder) {
         Optional<Corp> corp = shopRepository.findCorpByShopId(newOrder.getIdShop());
+        boolean noContent = false;
         if (corp.isPresent()) {
-            String response = "";
+            ResponseEntity<String> response = null;
             do {
                 try {
                     String url = properties.getUrl() + properties.getUpd();
                     String requestBodyJson = objectMapper.writeValueAsString(newOrder);
                     HttpEntity<String> entity = new HttpEntity<>(requestBodyJson,
                             getHttpHeaders(corp.get().getLogin(), corp.get().getPassword()));
-                    response = restTemplate
-                            .exchange(url, HttpMethod.POST, entity, String.class)
-                            .getStatusCode()
-                            .toString();
+                    response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
                     log.info(response + ":\n" + requestBodyJson);
-
+                    if (response.getStatusCode() == HttpStatus.NO_CONTENT) noContent = true;
                 } catch (HttpClientErrorException ex) {
                     log.error(ex.getStatusCode() + ": " + ex.getMessage());
                 } catch (JsonProcessingException ex) {
                     log.error(ex.getMessage());
                 }
-            } while (response.equals("200"));
+                if (noContent) throw new OrderOutOfDateException("Order " + newOrder.getIdOrder() + " expired and canceled by Booking!");
+            } while (response.getStatusCode().is2xxSuccessful());
         } else {
-            log.error("Can't be sent: {}", newOrder.toString());
+            log.error("Can't be sent: {}", newOrder);
         }
     }
 

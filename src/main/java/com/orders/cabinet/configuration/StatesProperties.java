@@ -18,4 +18,5 @@ public class StatesProperties {
     String cancel;
     String confirm;
     String comlete;
+    String neww;
 }

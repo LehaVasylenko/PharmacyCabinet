@@ -4,6 +4,7 @@ import com.orders.cabinet.model.db.Shops;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.builder.ToStringExclude;
 
 import java.util.List;
 
