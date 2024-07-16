@@ -2,6 +2,8 @@ package com.orders.cabinet.model.db;
 
 import com.orders.cabinet.event.EntityAuditListener;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -21,18 +23,23 @@ public class Corp {
 
     @Id
     @Column(name = "corp_id", unique = true)
+    @NotEmpty
     String corpId;
 
     @Column(name = "login")
+    @NotEmpty
     String login;
 
     @Column(name = "password")
+    @NotEmpty
     String password;
 
     @Column(name = "corp_name")
+    @NotEmpty
     String corpName;
 
     @Column(name = "life_time")
+    @Min(24)
     Integer lifeTime;
 
     @OneToMany(mappedBy = "corp", cascade = CascadeType.ALL, orphanRemoval = true)

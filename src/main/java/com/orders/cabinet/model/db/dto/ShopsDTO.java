@@ -1,6 +1,6 @@
 package com.orders.cabinet.model.db.dto;
 
-import com.orders.cabinet.model.db.Corp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.orders.cabinet.model.db.order.OrderDb;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
@@ -11,7 +11,9 @@ import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
+@ToString(exclude = "orders")
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShopsDTO {
@@ -22,5 +24,6 @@ public class ShopsDTO {
     Date lastLogin;
     Boolean loggedIn;
     String corpId;
+    @JsonIgnore
     List<OrderDb> orders;
 }

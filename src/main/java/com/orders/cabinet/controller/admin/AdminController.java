@@ -3,6 +3,10 @@ package com.orders.cabinet.controller.admin;
 import com.orders.cabinet.exception.NoSuchShopException;
 import com.orders.cabinet.model.db.dto.*;
 import com.orders.cabinet.service.AdminService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +25,23 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("${main.module.admin.panel}")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Tag(name = "Admin Controller", description = "Allow operations to manage shops and corporations")
 public class AdminController {
 
     AdminService service;
 
     @PostMapping("${main.module.corps.add}")
+    @Operation(summary = "Add corporation",
+            description = "Only a user with Administrator access level can add",
+            tags = {"Add"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successful operation"),
+            @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
+            @ApiResponse(responseCode = "401", description = "Not authorized"),
+            @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "409", description = "Such corp already exists"),
+            @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
+    })
     public CompletableFuture<ResponseEntity<String>> addCorp(@Valid @RequestBody List<CorpDTO> corpDTO) {
         return service.saveCorp(corpDTO)
                 .thenApply(result -> ResponseEntity.status(201).body("Corps saved successfully"))
@@ -33,12 +49,24 @@ public class AdminController {
                     if (ex.getCause() instanceof SQLException) {
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getCause().getMessage());
                     } else {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getCause().getMessage());
                     }
                 });
     }
 
     @PostMapping("${main.module.shops.add}")
+    @Operation(summary = "Add shop",
+            description = "Only a user with Administrator access level can add",
+            tags = {"Add"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successful operation"),
+            @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
+            @ApiResponse(responseCode = "401", description = "Not authorized"),
+            @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "404", description = "Shop with such ID doesn't exists in https://api.geoapteka.com.ua/show-shops"),
+            @ApiResponse(responseCode = "409", description = "Such shop already exists"),
+            @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
+    })
     public CompletableFuture<ResponseEntity<List<ShopInfoCacheDTO>>> addShop(@Valid @RequestBody List<AddShopDTO> shop) {
         return service.saveShop(shop)
                 .thenApply(result -> ResponseEntity.status(201).body(result))
@@ -63,21 +91,40 @@ public class AdminController {
     }
 
     @PostMapping("${main.module.admin.add}")
+    @Operation(summary = "Add administrator",
+            description = "Only a user with Administrator access level can add",
+            tags = {"Add"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successful operation"),
+            @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
+            @ApiResponse(responseCode = "401", description = "Not authorized"),
+            @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "409", description = "Admin with such username already exists"),
+            @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
+    })
     public CompletableFuture<ResponseEntity<String>> addAdmin(@Valid @RequestBody AdminDTO adminDTO) {
         return service.saveAdmin(adminDTO)
                 .thenApply(result -> ResponseEntity.status(201).body("Admin saved successfully"))
                 .exceptionally(ex -> {
                     if (ex.getCause() instanceof SQLException) {
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getCause().getMessage());
-                    } else if (ex.getCause() instanceof NoSuchShopException) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getCause().getMessage());
                     } else {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getCause().getMessage());
                     }
                 });
     }
 
     @PostMapping("${main.module.corps.edit}/{corpId}")
+    @Operation(summary = "Edit corporation",
+            description = "Only a user with Administrator access level can add. You can edit not only all fields, but also some separately",
+            tags = {"Edit"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
+            @ApiResponse(responseCode = "401", description = "Not authorized"),
+            @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
+    })
     public CompletableFuture<ResponseEntity<String>> editCorp(@Valid @RequestBody CorpDTO corpDTO, @PathVariable String corpId) {
 
         return service.editCorpById(corpId, corpDTO)
@@ -86,6 +133,16 @@ public class AdminController {
     }
 
     @PostMapping("${main.module.shops.edit}/{shopId}")
+    @Operation(summary = "Edit shop",
+            description = "Only a user with Administrator access level can add. Can be edited only password",
+            tags = {"Edit"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
+            @ApiResponse(responseCode = "401", description = "Not authorized"),
+            @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
+    })
     public CompletableFuture<ResponseEntity<String>> editShop(@RequestBody String password, @PathVariable String shopId) {
         return service.editShopById(shopId, password)
                 .thenApply(ResponseEntity::ok)
@@ -93,6 +150,16 @@ public class AdminController {
     }
 
     @PostMapping("${main.module.shops.delete}")
+    @Operation(summary = "Delete shop",
+            description = "Only a user with Administrator access level can add. Also, all orders that were linked to the store will be deleted",
+            tags = {"Delete"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
+            @ApiResponse(responseCode = "401", description = "Not authorized"),
+            @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
+    })
     public CompletableFuture<ResponseEntity<String>> deleteShop(@RequestBody String shopId) {
         return service.deleteShop(shopId)
                 .thenApply(ResponseEntity::ok)
@@ -100,6 +167,16 @@ public class AdminController {
     }
 
     @PostMapping("${main.module.corps.delete}")
+    @Operation(summary = "Delete corporation",
+            description = "Only a user with Administrator access level can add. Also, all shops and orders that were linked to the corp will be deleted",
+            tags = {"Delete"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
+            @ApiResponse(responseCode = "401", description = "Not authorized"),
+            @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
+    })
     public CompletableFuture<ResponseEntity<String>> deleteCorp(@RequestBody String corpId) {
         return service.deleteCorp(corpId)
                 .thenApply(ResponseEntity::ok)
@@ -107,9 +184,24 @@ public class AdminController {
     }
 
     @GetMapping("${main.module.shops.get}/{shopId}")
+    @Operation(summary = "Get shop by ID",
+            description = "Only a user with Administrator access level can add.",
+            tags = {"Get"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
+            @ApiResponse(responseCode = "401", description = "Not authorized"),
+            @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
+    })
     public CompletableFuture<ResponseEntity<ShopsDTO>> getByShopId(@PathVariable String shopId) {
         return service.getShopById(shopId)
                 .thenApply(ResponseEntity::ok)
-                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ShopsDTO
+                        .builder()
+                                .shopId(ex.getCause().getMessage())
+                                .corpId(ex.getMessage())
+                                .password(ex.getLocalizedMessage())
+                        .build()));
     }
 }

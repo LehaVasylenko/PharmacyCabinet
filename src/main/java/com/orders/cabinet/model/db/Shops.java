@@ -4,6 +4,7 @@ import com.orders.cabinet.event.EntityAuditListener;
 import com.orders.cabinet.model.Role;
 import com.orders.cabinet.model.db.order.OrderDb;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -22,9 +23,11 @@ import java.util.List;
 public class Shops {
     @Id
     @Column(name = "shop_id", unique = true)
+    @NotEmpty
     String shopId;
 
     @Column(name = "password")
+    @NotEmpty
     String password;
 
     @Enumerated(EnumType.STRING)
