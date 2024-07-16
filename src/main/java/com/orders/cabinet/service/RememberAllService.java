@@ -19,6 +19,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -35,7 +38,18 @@ public class RememberAllService {
     @Async
     @Scheduled(cron = "${scheduled.cron}")
     public void rememberOrder() {
-        List<OrderDb> newOrders = repository.findOrdersWithOnlyOneState();
+        List<OrderDb> newOrders = repository.findOrdersWithOnlyOneState()
+                .stream()
+                .filter(order -> order.getStates()
+                        .get(order.getStates().size() - 1)
+                        .getTime()
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime()
+                        .plusMinutes(40L)
+                        .isAfter(LocalDateTime.now()))
+                .toList();
+
         if (!newOrders.isEmpty()) {
             for (OrderDb order: newOrders) {
                 NotificationDTO notific = NotificationDTO

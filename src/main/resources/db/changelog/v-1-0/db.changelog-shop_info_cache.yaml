@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: 7
+      author: Vasylenko_O
+      changes:
+        - createTable:
+            tableName: shop_info_cache
+            columns:
+              - column:
+                  name: shop_id
+                  type: VARCHAR(255)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: corp_id
+                  type: VARCHAR(255)
+              - column:
+                  name: corp_name
+                  type: VARCHAR(255)
+              - column:
+                  name: shop_name
+                  type: VARCHAR(255)
+              - column:
+                  name: mark
+                  type: VARCHAR(255)
+              - column:
+                  name: area
+                  type: VARCHAR(255)
+              - column:
+                  name: city
+                  type: VARCHAR(255)
+              - column:
+                  name: street
+                  type: VARCHAR(255)
+              - column:
+                  name: update
+                  type: VARCHAR(255)
+              - column:
+                  name: open_hours
+                  type: VARCHAR(255)

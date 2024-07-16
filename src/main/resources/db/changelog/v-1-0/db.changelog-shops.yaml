@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: 8
+      author: Vasylenko_O
+      changes:
+        - createTable:
+            tableName: shops
+            columns:
+              - column:
+                  name: shop_id
+                  type: VARCHAR(255)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+              - column:
+                  name: role
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: logged
+                  type: BOOLEAN
+              - column:
+                  name: corp_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: shops
+            baseColumnNames: corp_id
+            referencedTableName: corp
+            referencedColumnNames: corp_id
+            constraintName: fk_shops_corp

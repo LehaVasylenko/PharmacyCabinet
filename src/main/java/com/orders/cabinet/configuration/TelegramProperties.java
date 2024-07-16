@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TelegramProperties {
     String url;
+    String ping;
     String path;
     String notificator;
 }

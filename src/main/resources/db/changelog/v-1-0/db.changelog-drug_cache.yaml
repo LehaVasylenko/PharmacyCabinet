@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: Vasylenko_O
+      changes:
+        - createTable:
+            tableName: drug_cache
+            columns:
+              - column:
+                  name: drug_id
+                  type: VARCHAR(255)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: drug_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false

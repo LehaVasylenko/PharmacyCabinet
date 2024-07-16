@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/v-1-0/db.changelog-admin.yaml
+  - include:
+      file: db/changelog/v-1-0/db.changelog-corp.yaml
+  - include:
+      file: db/changelog/v-1-0/db.changelog-drug_cache.yaml
+  - include:
+      file: db/changelog/v-1-0/db.changelog-log_entries.yaml
+  - include:
+      file: db/changelog/v-1-0/db.changelog-shop_info_cache.yaml
+  - include:
+      file: db/changelog/v-1-0/db.changelog-shops.yaml
+  - include:
+      file: db/changelog/v-1-0/db.changelog-orders.yaml
+  - include:
+      file: db/changelog/v-1-0/db.changelog-states.yaml
+  - include:
+      file: db/changelog/v-1-0/db.changelog-preps_in_order.yaml

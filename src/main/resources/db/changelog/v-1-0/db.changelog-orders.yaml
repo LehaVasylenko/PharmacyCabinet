@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: 5
+      author: Vasylenko_O
+      changes:
+        - createTable:
+            tableName: orders
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: order_id
+                  type: VARCHAR(255)
+              - column:
+                  name: shop_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: shop_ext_id
+                  type: VARCHAR(255)
+              - column:
+                  name: phone
+                  type: VARCHAR(255)
+              - column:
+                  name: agent
+                  type: VARCHAR(255)
+              - column:
+                  name: time
+                  type: BIGINT
+              - column:
+                  name: shipping
+                  type: VARCHAR(255)
+        - addForeignKeyConstraint:
+            baseTableName: orders
+            baseColumnNames: shop_id
+            referencedTableName: shops
+            referencedColumnNames: shop_id
+            constraintName: fk_orders_shops
