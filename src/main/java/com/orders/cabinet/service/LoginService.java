@@ -73,7 +73,13 @@ public class LoginService {
     }
 
     private void doLogOut(String shopId) {
-        shopRepository.updateLoggedIn(shopId, false);
+        Optional<Shops> byId = shopRepository.findById(shopId);
+        if (byId.isEmpty()) throw new NoSuchShopException("No shop with ID " + shopId);
+        else {
+            Shops shops = byId.get();
+            if (!shops.isLogged()) throw new IllegalStateException("Shop " + shopId + " already logged out");
+            else shopRepository.updateLoggedIn(shopId, false);
+        }
     }
 
     @Scheduled(cron="${scheduled.cron}")
