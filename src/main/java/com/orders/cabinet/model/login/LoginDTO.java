@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Schema(description = "Data Transfer Object for Login")
+@Schema(description = "Data Transfer Object for Login Request")
 public class LoginDTO {
 
     @NotEmpty(message = "Username can't be empty!")

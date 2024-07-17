@@ -1,7 +1,16 @@
 package com.orders.cabinet.controller.user;
 
 import com.orders.cabinet.exception.NoSuchShopException;
+import com.orders.cabinet.model.api.dto.OrderDTO;
+import com.orders.cabinet.model.db.dto.ShopInfoCacheDTO;
 import com.orders.cabinet.service.AdditionalService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -11,7 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLException;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 
@@ -19,31 +28,126 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("${user.additional}")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Tag(name = "Additional User Controller", description = "Allows users to get all orders or find order by last 4 symbols")
 public class AdditionalController {
     AdditionalService additionalService;
 
     @PostMapping("/get/last")
-    public CompletableFuture<? extends ResponseEntity<?>> findByLast4Symbol(@AuthenticationPrincipal UserDetails userDetails,
-                                  @RequestBody String last) {
+    @Operation(summary = "Find orders by last 4 symbols",
+            description = "Allowed for Shops. Returns list of orders corresponding to the pharmacy which ends with specified 4 symbols",
+            tags = {"Get"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "204", description = "No orders were found",
+                    content = @Content(
+                    schema = @Schema(implementation = ShopInfoCacheDTO.class),
+                    examples = @ExampleObject(value = """
+                    [
+                                   {
+                                     "phone": "Error message 1",
+                                     "time": "Error message 2",
+                                     "idOrder": "Error message 3",
+                                   }
+                                 ]
+                """)
+            )),
+            @ApiResponse(responseCode = "400", description = "Bad request. Something wrong",
+                    content = @Content(
+                            schema = @Schema(implementation = ShopInfoCacheDTO.class),
+                            examples = @ExampleObject(value = """
+                    [
+                                   {
+                                     "phone": "Error message 1",
+                                     "time": "Error message 2",
+                                     "idOrder": "Error message 3",
+                                   }
+                                 ]
+                """)
+                    )),
+            @ApiResponse(responseCode = "401", description = "Not authorized",
+                    content = @Content(
+                            examples = @ExampleObject(value = "     ")
+                    )),
+            @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body",
+                    content = @Content(
+                            schema = @Schema(implementation = ShopInfoCacheDTO.class),
+                            examples = @ExampleObject(value = """
+                    [
+                                   {
+                                     "phone": "Error message 1",
+                                     "time": "Error message 2",
+                                     "idOrder": "Error message 3",
+                                   }
+                                 ]
+                """)
+                    ))
+    })
+    public CompletableFuture<ResponseEntity<List<OrderDTO>>> findByLast4Symbol(@AuthenticationPrincipal UserDetails userDetails,
+                                                                               @RequestBody String last) {
         return additionalService.getOrderBy4LastSymbols(userDetails.getUsername(), last)
                 .thenApply(ResponseEntity::ok)
                 .exceptionally(ex -> {
                     Throwable cause = ex.getCause();
                     if (cause instanceof NoSuchShopException) {
-                        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-                    } else if (cause instanceof NoSuchElementException) {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(List.of(OrderDTO
+                                .builder()
+                                    .idOrder(ex.getMessage())
+                                    .phone(ex.getCause().getMessage())
+                                    .time(ex.getLocalizedMessage())
+                                .build()));
+                    } else if (cause instanceof NoSuchElementException || cause instanceof IllegalArgumentException) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(OrderDTO
+                                .builder()
+                                    .idOrder(ex.getMessage())
+                                    .phone(ex.getCause().getMessage())
+                                    .time(ex.getLocalizedMessage())
+                                .build()));
                     } else {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of(OrderDTO
+                                .builder()
+                                    .idOrder(ex.getMessage())
+                                    .phone(ex.getCause().getMessage())
+                                    .time(ex.getLocalizedMessage())
+                                .build()));
                     }
                 });
     }
 
     @GetMapping("/get/all")
-    public CompletableFuture<? extends ResponseEntity<?>> getAllOrdersForShop(@AuthenticationPrincipal UserDetails userDetails) {
+    @Operation(summary = "Find all orders for the shop",
+            description = "Allowed for Shops. Returns list of orders corresponding to the pharmacy",
+            tags = {"Get"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "400", description = "Bad request. Something wrong"),
+            @ApiResponse(responseCode = "401", description = "Not authorized"),
+            @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body",
+                    content = @Content(
+                            schema = @Schema(implementation = ShopInfoCacheDTO.class),
+                            examples = @ExampleObject(value = """
+                    [
+                                   {
+                                     "phone": "Error message 1",
+                                     "time": "Error message 2",
+                                     "idOrder": "Error message 3",
+                                   }
+                                 ]
+                """)
+                    ))
+    })
+    public CompletableFuture<ResponseEntity<List<OrderDTO>>> getAllOrdersForShop(@AuthenticationPrincipal UserDetails userDetails) {
         return additionalService.getAllOrdersForShop(userDetails.getUsername())
                 .thenApply(ResponseEntity::ok)
-                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                .exceptionally(ex -> ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(List.of(OrderDTO
+                            .builder()
+                            .idOrder(ex.getMessage())
+                            .phone(ex.getCause().getMessage())
+                            .time(ex.getLocalizedMessage())
+                            .build())
+                        )
+                );
     }
 
 

@@ -104,7 +104,7 @@ public class OrderMapper {
 
     private String getTime(Long timestamp) {
         LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.systemDefault());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd:MM:yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd.MM.yyyy");
         return dateTime.format(formatter);
     }
 }

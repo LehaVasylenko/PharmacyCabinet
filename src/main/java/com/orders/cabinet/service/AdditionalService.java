@@ -27,17 +27,22 @@ public class AdditionalService {
     OrderMapper mapper;
 
     @Async
-    public CompletableFuture<?> getAllOrdersForShop(String addressId) {
+    public CompletableFuture<List<OrderDTO>> getAllOrdersForShop(String addressId) {
         List<OrderDb> ordersByShop = orderRepository.findByShopId(addressId);
         return CompletableFuture.completedFuture(ordersByShop.stream().map(mapper::DBToDTO).toList());
     }
 
     @Async
-    public CompletableFuture<?> getOrderBy4LastSymbols(String addressId, String last) {
+    public CompletableFuture<List<OrderDTO>> getOrderBy4LastSymbols(String addressId, String last) {
+        //get all orders
         List<OrderDb> ordersByShop = orderRepository.findByShopId(addressId);
-        List<OrderDb> possibleOrder = ordersByShop.stream().filter(order -> order.getOrderId().endsWith(last)).toList();
-        if (!possibleOrder.isEmpty()) return CompletableFuture.completedFuture(possibleOrder.stream().map(mapper::DBToDTO));
-        else return CompletableFuture.failedFuture(new NoSuchShopException("No orders, which ends with " + last + " for shop " + addressId + "!"));
+        //get only orders which ends by last 4 symbols
+        List<OrderDb> possibleOrder = ordersByShop
+                .stream()
+                .filter(order -> order.getOrderId().endsWith(last))
+                .toList();
+        if (!possibleOrder.isEmpty()) return CompletableFuture.completedFuture(possibleOrder.stream().map(mapper::DBToDTO).toList());
+        else return CompletableFuture.failedFuture(new NoSuchShopException("No orders, which ends with '" + last + "' for shop '" + addressId + "'!"));
     }
 
 }

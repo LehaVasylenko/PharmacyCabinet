@@ -22,8 +22,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfig {
     UserService userService;
-    PasswordEncoder passwordEncoder;
-
 
     @Bean
     public SecurityFilterChain web(HttpSecurity http) throws Exception {
