@@ -1,10 +1,14 @@
 package com.orders.cabinet.service;
 
 import com.orders.cabinet.configuration.StatesProperties;
+import com.orders.cabinet.mapper.ShopInfoCachRepositoryMapper;
+import com.orders.cabinet.model.db.ShopInfoCache;
 import com.orders.cabinet.model.db.Shops;
+import com.orders.cabinet.model.db.dto.ShopInfoCacheDTO;
 import com.orders.cabinet.model.db.order.OrderDb;
 import com.orders.cabinet.repository.CorpRepository;
 import com.orders.cabinet.repository.OrderRepository;
+import com.orders.cabinet.repository.ShopInfoCacheRepository;
 import com.orders.cabinet.repository.ShopRepository;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -31,6 +35,8 @@ public class CleanUpService {
     OrderRepository orderRepository;
     StatesProperties statesProperties;
     CorpRepository corpRepository;
+    ShopInfoCacheRepository shopInfoCacheRepository;
+    AdminService adminService;
 
     //@Scheduled(cron = "0 */1 * * * *")// Testing feature each 1 minutes
     @Scheduled(cron = "0 1 0 * * *") // Runs every day at 00:01
@@ -91,5 +97,23 @@ public class CleanUpService {
                     .map(OrderDb::getOrderId)
                     .collect(Collectors.joining("\n")));
         }
+
+        updateShopInfoCache();
     }
+
+    private void updateShopInfoCache() {
+        List<ShopInfoCacheDTO> all = shopInfoCacheRepository
+                .findAll()
+                .stream()
+                .map(ShopInfoCachRepositoryMapper.INSTANCE::toDto)
+                .toList();
+        for (ShopInfoCacheDTO shopInfo: all) {
+            ShopInfoCacheDTO shopInfoCacheDTOResponseEntity = adminService.getShopInfoCacheDTOResponseEntity(shopInfo.getShopId());
+            if (!shopInfo.equals(shopInfoCacheDTOResponseEntity)) {
+                shopInfoCacheRepository.save(ShopInfoCachRepositoryMapper.INSTANCE.toModel(shopInfoCacheDTOResponseEntity));
+            }
+        }
+    }
+
+
 }

@@ -203,7 +203,7 @@ public class AdminService {
         }
     }
 
-    private ShopInfoCacheDTO getShopInfoCacheDTOResponseEntity(String shopId) {
+    public ShopInfoCacheDTO getShopInfoCacheDTOResponseEntity(String shopId) {
         String url = "https://api.apteki.ua/get_shop/" + shopId;
 
         HttpHeaders headers = new HttpHeaders();
@@ -217,6 +217,7 @@ public class AdminService {
                 entity,
                 ShopInfoCacheDTO.class
         );
+        log.info(response.toString());
         return response.getBody();
     }
 }

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orders.cabinet.configuration.PopOrderProperties;
 import com.orders.cabinet.configuration.StatesProperties;
 import com.orders.cabinet.event.OrderReceivedEvent;
+import com.orders.cabinet.exception.ImpossibleException;
+import com.orders.cabinet.exception.NoSuchShopException;
 import com.orders.cabinet.exception.OrderOutOfDateException;
 import com.orders.cabinet.mapper.OrderMapper;
 import com.orders.cabinet.model.api.Order;
@@ -81,7 +83,7 @@ public class UpdateOrderService {
                     orders.stream().map(mapper::OrderToDto).collect(Collectors.toList())
             );
         } else {
-            return CompletableFuture.completedFuture(new ArrayList<>());
+            return CompletableFuture.failedFuture(new NoSuchShopException(""));
         }
     }
 
@@ -168,13 +170,16 @@ public class UpdateOrderService {
                     if (response.getStatusCode() == HttpStatus.OK) notEnought = false;
                 } catch (HttpClientErrorException ex) {
                     log.error(ex.getStatusCode() + ": " + ex.getMessage());
+                    throw new IllegalStateException(ex.getStatusCode() + " -> " + ex.getMessage());
                 } catch (JsonProcessingException ex) {
                     log.error(ex.getMessage());
+                    throw new IllegalArgumentException(ex.getMessage());
                 }
                 if (noContent) throw new OrderOutOfDateException("Order " + newOrder.getIdOrder() + " expired and canceled by Booking!");
             } while (notEnought);
         } else {
             log.error("Can't be sent: {}", newOrder);
+            throw new ImpossibleException("No data for communication with booking");
         }
     }
 

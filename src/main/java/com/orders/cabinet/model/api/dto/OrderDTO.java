@@ -23,6 +23,8 @@ public class OrderDTO {
     String idOrder;
     @Schema(description = "State of order. Allowed states are: 'New', 'Confirmed', 'Canceled', 'Completed'", example = "New")
     String state;
+    @Schema(description = "Error message. For any exception if exist", example = "Houston, we have problems.")
+    String errorMessage;
     @Schema(description = "List of drugs in the order")
     List<OrderPrepsDTO> data;
 }
