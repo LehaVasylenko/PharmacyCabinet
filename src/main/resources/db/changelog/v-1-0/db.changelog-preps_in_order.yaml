@@ -32,9 +32,13 @@ databaseChangeLog:
               - column:
                   name: drug_name
                   type: VARCHAR(255)
+              - column:
+                  name: drug_link
+                  type: VARCHAR(255)
         - addForeignKeyConstraint:
             baseTableName: preps_in_order
             baseColumnNames: state_id
             referencedTableName: states
             referencedColumnNames: id
             constraintName: fk_preps_in_order_states
+            remarks: "Table for storing info about drugs in order"

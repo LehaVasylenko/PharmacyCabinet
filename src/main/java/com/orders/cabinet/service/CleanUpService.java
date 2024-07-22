@@ -25,7 +25,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+/**
+ * Service for performing periodic cleanup tasks.
+ *
+ * <p>This service provides scheduled methods for cleaning up orders and updating shop information cache.</p>
+ *
+ * @author Vasylenko Oleksii
+ * @company Proxima Research International
+ * @version 1.0
+ * @since 2024-07-19
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,6 +47,12 @@ public class CleanUpService {
     ShopInfoCacheRepository shopInfoCacheRepository;
     AdminService adminService;
 
+    /**
+     * Cleans up orders based on their states and lifetimes.
+     *
+     * <p>This method is scheduled to run daily at 00:01. It deletes orders with specific states (complete or canceled)
+     * and also removes expired orders based on their lifetimes. Additionally, it updates the shop information cache.</p>
+     */
     //@Scheduled(cron = "0 */1 * * * *")// Testing feature each 1 minutes
     @Scheduled(cron = "0 1 0 * * *") // Runs every day at 00:01
     @Transactional
@@ -101,6 +116,12 @@ public class CleanUpService {
         updateShopInfoCache();
     }
 
+    /**
+     * Updates the shop information cache.
+     *
+     * <p>This method retrieves the current shop information from an external source and updates the local cache if
+     * discrepancies are found.</p>
+     */
     private void updateShopInfoCache() {
         List<ShopInfoCacheDTO> all = shopInfoCacheRepository
                 .findAll()

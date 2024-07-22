@@ -43,3 +43,4 @@ databaseChangeLog:
             referencedTableName: shops
             referencedColumnNames: shop_id
             constraintName: fk_states_shops
+            remarks: "Table for storing States of Orders"

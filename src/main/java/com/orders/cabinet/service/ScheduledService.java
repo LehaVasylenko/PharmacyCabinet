@@ -28,12 +28,25 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-
+/**
+ * Service for periodically retrieving orders from available shops and processing them.
+ *
+ * <p>This service is scheduled to periodically make requests to retrieve orders from shops
+ * that are currently logged in. It processes these orders and publishes events for them.</p>
+ *
+ * @author Vasylenko Oleksii
+ * @company Proxima Research International
+ * @version 1.0
+ * @since 2024-07-19
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -51,15 +64,25 @@ public class ScheduledService {
 
     Map<String, CorpDTO> corps = new HashMap<>();
 
+    /**
+     * Retrieves a list of available shops that are currently logged in.
+     *
+     * @return a list of {@link ShopsDTO} representing available shops.
+     */
     private List<ShopsDTO> getAvailableShops() {
         List<ShopsDTO> result = repo.findAllByLoggedTrue().stream().map(mapper::toDto).collect(Collectors.toList());
         log.info(result.toString());
         return result;
     }
 
-
-    //@Scheduled(fixedRateString = "${pop-order.rate}")
-    @Scheduled(fixedRate = 10000)
+    /**
+     * Periodically retrieves orders from available shops and processes them.
+     *
+     * <p>This method is scheduled to run at a fixed rate (every 10 seconds) and
+     * processes orders for each available shop asynchronously.</p>
+     */
+    @Scheduled(fixedRateString = "${pop-order.rate}")
+    //@Scheduled(fixedRate = 10000)
     public void makeRequest() {
 
         List<ShopsDTO> result = getAvailableShops();
@@ -70,6 +93,12 @@ public class ScheduledService {
         }
     }
 
+    /**
+     * Asynchronously processes orders for a specific shop.
+     *
+     * @param shop the {@link ShopsDTO} representing the shop to process.
+     * @return a {@link CompletableFuture} indicating the completion of the task.
+     */
     @Async
     public CompletableFuture<Void> doFuckingMagicAsync(ShopsDTO shop) {
         try {
@@ -80,6 +109,14 @@ public class ScheduledService {
         return CompletableFuture.completedFuture(null);
     }
 
+    /**
+     * Processes orders for a specific shop by making an HTTP request to retrieve them.
+     *
+     * @param shop the {@link ShopsDTO} representing the shop to process.
+     * @throws InterruptedException if the thread is interrupted while waiting.
+     * @throws ExecutionException if an exception occurs during asynchronous processing.
+     * @throws JsonProcessingException if there is an error processing JSON.
+     */
     private void doFuckingMagic(ShopsDTO shop) throws InterruptedException, ExecutionException, JsonProcessingException {
         String url = properties.getUrl() + properties.getPop();
         CorpDTO temp = null;
@@ -114,6 +151,13 @@ public class ScheduledService {
         }
     }
 
+    /**
+     * Creates HTTP headers for the request including authorization and content type.
+     *
+     * @param username the username for authorization.
+     * @param password the password for authorization.
+     * @return the {@link HttpHeaders} to be used in the HTTP request.
+     */
     private HttpHeaders getHttpHeaders(String username, String password) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
@@ -122,6 +166,13 @@ public class ScheduledService {
         return headers;
     }
 
+    /**
+     * Creates an authorization header for basic authentication.
+     *
+     * @param username the username for authorization.
+     * @param password the password for authorization.
+     * @return the authorization header as a {@link String}.
+     */
     private String getAuthHeader(String username, String password) {
         String auth = username + ":" + password;
         byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.UTF_8));

@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 @Data
 @Table(name = "log_entries")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LogEntry {
+public class LogEntityEntry {
 
     /**
      * The unique identifier for the log entry.

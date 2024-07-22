@@ -45,6 +45,16 @@ public class OrderPrepsDTO {
     String drugName;
 
     /**
+     * Drug name.
+     *
+     * <p>This field provides the link to the drug at Compendium.</p>
+     *
+     * @example "https://compendium.com.ua/info/4556/7167/"
+     */
+    @Schema(description = "Drug link", example = "https://compendium.com.ua/info/4556/7167/")
+    String drugLink;
+
+    /**
      * Quantity of drug in the order.
      *
      * <p>This field specifies the quantity of the drug ordered. Must be zero or positive.</p>

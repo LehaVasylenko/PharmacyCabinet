@@ -43,4 +43,13 @@ public class DrugCache {
      */
     @Column(name = "drug_name", nullable = false)
     String drugName;
+
+    /**
+     * A link to the drug info.
+     *
+     * <p>This field stores a link to the drug.</p>
+     * <p>This field cannot be null.</p>
+     */
+    @Column(name = "drug_link", nullable = false)
+    String drugLink;
 }

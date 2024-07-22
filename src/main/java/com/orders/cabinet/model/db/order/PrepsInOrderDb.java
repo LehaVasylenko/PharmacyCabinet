@@ -80,4 +80,12 @@ public class PrepsInOrderDb extends BaseEntity{
      */
     @Column(name = "drug_name")
     String drugName;
+
+    /**
+     * The link to the drug info
+     *
+     * <p>This field stores the link to the drug info at Compendium.</p>
+     */
+    @Column(name = "drug_link")
+    String drugLink;
 }

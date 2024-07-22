@@ -5,7 +5,6 @@ import com.orders.cabinet.exception.NoSuchShopException;
 import com.orders.cabinet.exception.OrderOutOfDateException;
 import com.orders.cabinet.model.api.dto.ControllerDTO;
 import com.orders.cabinet.model.api.dto.OrderDTO;
-import com.orders.cabinet.model.db.dto.ShopInfoCacheDTO;
 import com.orders.cabinet.service.UpdateOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,11 +24,19 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
-
+/**
+ * Controller for order manipulation operations.
+ *
+ * <p>This controller allows shops to get new orders, confirm, cancel, and complete orders.</p>
+ *
+ * @author Vasylenko Oleksii
+ * @company Proxima Research International
+ * @version 1.0
+ * @since 2024-07-19
+ */
 @RestController
 @RequestMapping("${user.orders}")
 @RequiredArgsConstructor
@@ -39,6 +46,12 @@ public class OrderManipulationController {
 
     UpdateOrderService service;
 
+    /**
+     * Retrieves new orders for a shop.
+     *
+     * @param userDetails the authenticated user details
+     * @return a list of new orders for the shop
+     */
     @GetMapping("${user.orders.new}")
     @Operation(summary = "Get New orders for shop",
             description = "Allowed for shops. Returns a list of orders for the pharmacy that made the request",
@@ -92,6 +105,13 @@ public class OrderManipulationController {
                 });
     }
 
+    /**
+     * Confirms an order for a shop.
+     *
+     * @param userDetails the authenticated user details
+     * @param controllerDTO the controller data transfer object
+     * @return a response entity indicating the result of the operation
+     */
     @PostMapping("${user.orders.confirm}")
     @Operation(summary = "Confirm order",
             description = "Allowed for shops. Sent when the pharmacy confirms an order received by it",
@@ -149,6 +169,13 @@ public class OrderManipulationController {
                 });
     }
 
+    /**
+     * Completes an order for a shop.
+     *
+     * @param userDetails the authenticated user details
+     * @param controllerDTO the controller data transfer object
+     * @return a response entity indicating the result of the operation
+     */
     @PostMapping("${user.orders.complete}")
     @Operation(summary = "Complete order",
             description = "Allowed for shops. Sent when a client redeems an order at a pharmacy",
@@ -206,6 +233,13 @@ public class OrderManipulationController {
                 });
     }
 
+    /**
+     * Cancels an order for a shop.
+     *
+     * @param userDetails the authenticated user details
+     * @param controllerDTO the controller data transfer object
+     * @return a response entity indicating the result of the operation
+     */
     @PostMapping("${user.orders.cancel}")
     @Operation(summary = "Cancel order",
             description = "Allowed for shops. Sent when a pharmacy cancels an order for one reason or another",

@@ -27,3 +27,4 @@ databaseChangeLog:
               - column:
                   name: exception
                   type: TEXT
+            remarks: "Table for storing DB logs"

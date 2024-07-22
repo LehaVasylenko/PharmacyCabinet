@@ -22,7 +22,17 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-
+/**
+ * Service for managing user details and authentication.
+ * <p>This service implements the {@link UserDetailsService} interface to provide user details for authentication.</p>
+ *
+ * <p>It also creates a default admin user if none exists.</p>
+ *
+ * @author Vasylenko Oleksii
+ * @company Proxima Research International
+ * @version 1.0
+ * @since 2024-07-19
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,6 +43,15 @@ public class UserService implements UserDetailsService {
     ShopRepository shopRepository;
     PasswordEncoder passwordEncoder;
 
+    /**
+     * Loads user details by username.
+     * <p>It first tries to load the user from the {@link ShopRepository}. If not found, it then tries to load from
+     * the {@link AdminRepository}.</p>
+     *
+     * @param username the username of the user to be loaded.
+     * @return a {@link UserDetails} object representing the user.
+     * @throws UsernameNotFoundException if no user with the provided username is found.
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info(username);
@@ -51,10 +70,20 @@ public class UserService implements UserDetailsService {
             throw new UsernameNotFoundException("User " + username + " not found!");
     }
 
+    /**
+     * Gets the authorities for the given role.
+     *
+     * @param role the {@link Role} of the user.
+     * @return a collection of {@link GrantedAuthority} objects representing the user's roles.
+     */
     private Collection<? extends GrantedAuthority> getAuthorities(Role role) {
         return Collections.singletonList(new SimpleGrantedAuthority(role.name()));
     }
 
+    /**
+     * Creates a default admin user if one does not already exist.
+     * <p>This method is called after the bean's properties have been initialized.</p>
+     */
     @PostConstruct
     public void createDefaultAdmin() {
         String defaultAdminName = "admin";

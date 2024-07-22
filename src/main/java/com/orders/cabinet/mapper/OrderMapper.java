@@ -4,6 +4,7 @@ import com.orders.cabinet.model.api.Order;
 import com.orders.cabinet.model.api.OrderPreps;
 import com.orders.cabinet.model.api.dto.OrderDTO;
 import com.orders.cabinet.model.api.dto.OrderPrepsDTO;
+import com.orders.cabinet.model.db.DrugCache;
 import com.orders.cabinet.model.db.order.OrderDb;
 import com.orders.cabinet.model.db.order.PrepsInOrderDb;
 import com.orders.cabinet.service.DrugNameService;
@@ -95,19 +96,20 @@ public class OrderMapper {
         List<OrderPrepsDTO> result = new ArrayList<>();
         for (int i = 0; i < orderPreps.size(); i++) {
 
-            String drugName = null;
+            DrugCache drugCache = null;
             try {
-                drugName = drugNameService
+                drugCache = drugNameService
                         .getDrugName(orderPreps.get(i).getId())
                         .get();
             } catch (InterruptedException | ExecutionException e) {
-                drugName = "Unknown Drug";
+                drugCache = new DrugCache(orderPreps.get(i).getId(), "Unknown Drug", "");
             }
 
             result.add(OrderPrepsDTO
                     .builder()
                             .morionId(orderPreps.get(i).getId())
-                            .drugName(drugName)
+                            .drugName(drugCache.getDrugName())
+                            .drugLink(drugCache.getDrugLink())
                             .quant(orderPreps.get(i).getQuant())
                             .price(orderPreps.get(i).getPrice())
                     .build());
@@ -129,18 +131,19 @@ public class OrderMapper {
         List<OrderPrepsDTO> result = new ArrayList<>();
         for (int i = 0; i < orderPreps.size(); i++) {
 
-            String drugName = null;
+            DrugCache drugName = null;
             try {
                 drugName = drugNameService
                         .getDrugName(orderPreps.get(i).getMorionId())
                         .get();
             } catch (InterruptedException | ExecutionException e) {
-                drugName = "Unknown Drug";
+                drugName = new DrugCache(orderPreps.get(i).getMorionId(), "Unknown Drug", "");
             }
 
             result.add(OrderPrepsDTO
                     .builder()
-                    .drugName(drugName)
+                    .drugName(drugName.getDrugName())
+                    .drugLink(drugName.getDrugLink())
                     .quant(orderPreps.get(i).getQuant())
                     .price(orderPreps.get(i).getPrice())
                     .build());

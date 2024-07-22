@@ -41,3 +41,4 @@ databaseChangeLog:
             referencedTableName: shops
             referencedColumnNames: shop_id
             constraintName: fk_orders_shops
+            remarks: "Table for storing info about Orders"

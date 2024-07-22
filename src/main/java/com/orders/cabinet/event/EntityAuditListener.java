@@ -1,12 +1,11 @@
 package com.orders.cabinet.event;
 
-import com.orders.cabinet.model.db.LogEntry;
+import com.orders.cabinet.model.db.*;
 import com.orders.cabinet.service.LogEntryService;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +63,7 @@ public class EntityAuditListener {
      * @param status the status of the action (e.g., "CREATED", "UPDATED", "DELETED")
      */
     private void saveLog(Object entity, String status) {
-        service.saveLogEntryAsync(LogEntry
+        service.saveLogEntryAsync(LogEntityEntry
                 .builder()
                 .timestamp(LocalDateTime.now())
                 .action(status)

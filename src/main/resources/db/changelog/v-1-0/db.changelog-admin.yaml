@@ -27,3 +27,4 @@ databaseChangeLog:
                   type: VARCHAR(255)
                   constraints:
                     nullable: false
+            remarks: "Table for info about Admin"

@@ -1,7 +1,6 @@
 package com.orders.cabinet.service;
 
 import com.orders.cabinet.configuration.TelegramProperties;
-import com.orders.cabinet.model.api.Order;
 import com.orders.cabinet.model.api.dto.NotificationDTO;
 import com.orders.cabinet.model.db.order.OrderDb;
 import com.orders.cabinet.repository.OrderRepository;
@@ -21,10 +20,18 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
+/**
+ * Service for managing and notifying about orders based on their state.
+ *
+ * <p>This service periodically checks for orders that have a specific state and
+ * sends notifications to Telegram App for orders which are wait too long for confirmation.</p>
+ *
+ * @author Vasylenko Oleksii
+ * @company Proxima Research International
+ * @version 1.0
+ * @since 2024-07-19
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,6 +42,17 @@ public class RememberAllService {
     TelegramProperties properties;
     RestTemplate restTemplate;
 
+    /**
+     * Periodically checks for orders with only one state and sends notifications
+     * for orders that are eligible based on their state timing.
+     *
+     * <p>This asynchronous and scheduled method retrieves orders that have only
+     * one state and checks if the last state timestamp plus 40 minutes is after
+     * the current time. If so, it sends a notification for each eligible order.</p>
+     *
+     * @see OrderDb
+     * @see NotificationDTO
+     */
     @Async
     @Scheduled(cron = "${scheduled.cron}")
     public void rememberOrder() {

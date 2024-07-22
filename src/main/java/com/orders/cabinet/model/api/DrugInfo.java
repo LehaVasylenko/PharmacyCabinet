@@ -32,6 +32,9 @@ public class DrugInfo {
      */
     String id;
 
+    @JsonProperty("id_info_ua")
+    String idInfo;
+
     /**
      * Name of the drug.
      *
@@ -210,5 +213,16 @@ public class DrugInfo {
         info += " " + this.packNoteUa + ", №" + this.numb + ", " + this.makeUa;
 
         return info;
+    }
+
+    /**
+     * Concatenates drug information into a drug-info link to Compendium.
+     *
+     * <p>This method returns a formatted string containing drug-info link to Compendium.</p>
+     *
+     * @return A formatted string with drug link to Compendium.
+     */
+    public String getDrugLink() {
+        return "https://compendium.com.ua/info/" + this.idInfo + "/" + this.id + "/";
     }
 }

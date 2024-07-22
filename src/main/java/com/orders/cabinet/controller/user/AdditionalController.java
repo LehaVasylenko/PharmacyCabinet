@@ -23,7 +23,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
-
+/**
+ * Controller for additional user operations.
+ *
+ * <p>This controller provides endpoints for users to get all orders or find orders by the last 4 symbols.</p>
+ *
+ * @version 1.0
+ * @since 2024-07-19
+ *
+ * @see OrderDTO
+ * @see ShopInfoCacheDTO
+ *
+ * @author Vasylenko Oleksii
+ * @company Proxima Research International
+ */
 @RestController
 @RequestMapping("${user.additional}")
 @RequiredArgsConstructor
@@ -32,6 +45,15 @@ import java.util.concurrent.CompletableFuture;
 public class AdditionalController {
     AdditionalService additionalService;
 
+    /**
+     * Find orders by the last 4 symbols.
+     *
+     * <p>Allowed for Shops. Returns a list of orders corresponding to the pharmacy which ends with the specified 4 symbols.</p>
+     *
+     * @param userDetails the authenticated user details
+     * @param last the last 4 symbols of the order identifier
+     * @return a response entity containing a list of order DTOs
+     */
     @PostMapping("/get/last")
     @Operation(summary = "Find orders by last 4 symbols",
             description = "Allowed for Shops. Returns list of orders corresponding to the pharmacy which ends with specified 4 symbols",
@@ -113,6 +135,14 @@ public class AdditionalController {
                 });
     }
 
+    /**
+     * Find all orders for the shop.
+     *
+     * <p>Allowed for Shops. Returns a list of orders corresponding to the pharmacy.</p>
+     *
+     * @param userDetails the authenticated user details
+     * @return a response entity containing a list of order DTOs
+     */
     @GetMapping("/get/all")
     @Operation(summary = "Find all orders for the shop",
             description = "Allowed for Shops. Returns list of orders corresponding to the pharmacy",

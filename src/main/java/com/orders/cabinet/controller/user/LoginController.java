@@ -26,7 +26,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.concurrent.CompletableFuture;
-
+/**
+ * Controller for handling login and logout operations for users.
+ *
+ * <p>This controller provides endpoints for users to login and log out,
+ * returning data corresponding to the pharmacy with the specified ID from https://api.geoapteka.com.ua/show-shops.</p>
+ *
+ * @version 1.0
+ * @since 2024-07-19
+ *
+ * @see ShopInfoCacheDTO
+ * @see LoginDTO
+ *
+ * @author Vasylenko Oleksii
+ * @company Proxima Research International
+ */
 @RestController
 @RequestMapping("${user.login.basePath}")
 @RequiredArgsConstructor
@@ -36,6 +50,15 @@ public class LoginController {
 
     LoginService loginService;
 
+    /**
+     * Endpoint for logging in a shop.
+     *
+     * <p>Allowed for all users. Returns data corresponding to the pharmacy with the specified ID
+     * from https://api.geoapteka.com.ua/show-shops.</p>
+     *
+     * @param loginDto the login data transfer object containing the login credentials
+     * @return a response entity containing the shop information cache DTO
+     */
     @PostMapping("/login")
     @Operation(summary = "Login for Shop",
             description = "Allowed for all users. Returns data corresponding to the pharmacy with the specified ID from https://api.geoapteka.com.ua/show-shops",
@@ -112,6 +135,14 @@ public class LoginController {
                 });
     }
 
+    /**
+     * Endpoint for logging out a shop.
+     *
+     * <p>Allowed for all users. Logs out the shop with the specified ID and returns a response indicating the result.</p>
+     *
+     * @param userDetails the authenticated user details
+     * @return a response entity containing the logout status message
+     */
     @PostMapping("/logout")
     @Operation(summary = "LogOut for Shop",
             description = "Allowed for all users. Returns data corresponding to the pharmacy with the specified ID from https://api.geoapteka.com.ua/show-shops",

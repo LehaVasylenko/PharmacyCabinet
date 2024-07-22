@@ -17,7 +17,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.CompletableFuture;
-
+/**
+ * Service send notifications about orders to Telegram App.
+ *
+ * <p>This service listens for order received events and sends notifications to a specified endpoint.</p>
+ *
+ * @author Vasylenko Oleksii
+ * @company Proxima Research International
+ * @version 1.0
+ * @since 2024-07-19
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,6 +35,14 @@ public class NotificationService {
     RestTemplate restTemplate;
     TelegramProperties properties;
 
+    /**
+     * Handles the event when an order is received and triggers the notification process.
+     *
+     * <p>This method listens for {@link OrderReceivedEvent} and extracts the order details from the event.
+     * It then initiates the process of sending notifications.</p>
+     *
+     * @param event The {@link OrderReceivedEvent} containing the order details.
+     */
     @EventListener
     public void handleOrderReceivedEvent(OrderReceivedEvent event) {
 
@@ -33,21 +50,28 @@ public class NotificationService {
         sendNotification(orders);
     }
 
+    /**
+     * Sends a notification containing the provided orders to the specified URL.
+     *
+     * <p>This method is asynchronous and sends a POST request to the configured URL with the order details.
+     * It handles any exceptions that may occur during the process and logs the response.</p>
+     *
+     * @param order An array of {@link Order} objects to be sent in the notification.
+     */
     @Async
-    public CompletableFuture<?> sendNotification(Order[] order) {
+    public void sendNotification(Order[] order) {
         String url = properties.getUrl() + properties.getPath();
+        for (int i = 0; i < order.length; i++) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+            HttpEntity<Order> requestEntity = new HttpEntity<>(order[i], headers);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-        HttpEntity<Order[]> requestEntity = new HttpEntity<>(order, headers);
-
-        try {
-            // Using exchange method
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
-            log.info("Response: {}", response);
-            return CompletableFuture.completedFuture(null);
-        } catch (Exception e) {
-            return CompletableFuture.failedFuture(e);
+            try {
+                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+                log.info("Response: {}", response);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
         }
     }
 }

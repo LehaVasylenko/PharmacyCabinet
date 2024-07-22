@@ -16,3 +16,9 @@ databaseChangeLog:
                   type: VARCHAR(255)
                   constraints:
                     nullable: false
+              - column:
+                  name: drug_link
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+            remarks: "Table for storing info about Drugs"

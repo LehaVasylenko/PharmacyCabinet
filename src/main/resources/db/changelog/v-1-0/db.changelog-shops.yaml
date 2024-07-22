@@ -33,3 +33,4 @@ databaseChangeLog:
             referencedTableName: corp
             referencedColumnNames: corp_id
             constraintName: fk_shops_corp
+            remarks: "Table for storing Shops"

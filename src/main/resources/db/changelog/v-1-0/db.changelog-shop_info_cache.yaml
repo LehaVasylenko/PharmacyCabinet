@@ -38,3 +38,4 @@ databaseChangeLog:
               - column:
                   name: open_hours
                   type: VARCHAR(255)
+            remarks: "Table for storing Shop Info"

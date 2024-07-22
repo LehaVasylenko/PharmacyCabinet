@@ -34,7 +34,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
+/**
+ * Service for handling admin-related operations.
+ *
+ * <p>This service provides asynchronous methods for managing corporations, shops,
+ * and administrators, including saving, retrieving, updating, and deleting entities.</p>
+ *
+ * @author Vasylenko Oleksii
+ * @company Proxima Research International
+ * @version 1.0
+ * @since 2024-07-19
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -49,7 +59,12 @@ public class AdminService {
     PasswordEncoder encoder;
     RestTemplate restTemplate;
 
-
+    /**
+     * Saves a list of corporations.
+     *
+     * @param corpDTO the list of CorpDTOs to save
+     * @return a CompletableFuture representing the completion of the operation
+     */
     @Async
     public CompletableFuture<Void> saveCorp(List<CorpDTO> corpDTO) {
         try {
@@ -65,6 +80,12 @@ public class AdminService {
         }
     }
 
+    /**
+     * Retrieves corporation information by ID.
+     *
+     * @param corpId the ID of the corporation
+     * @return a CompletableFuture containing the CorpDTO
+     */
     @Async
     public CompletableFuture<CorpDTO> getCorpInfoById (String corpId) {
         return CompletableFuture
@@ -77,6 +98,11 @@ public class AdminService {
                 );
     }
 
+    /**
+     * Retrieves all corporation information.
+     *
+     * @return a CompletableFuture containing a list of CorpDTOs
+     */
     @Async
     public CompletableFuture<List<CorpDTO>> getAllCorpInfo () {
         return CompletableFuture
@@ -87,6 +113,12 @@ public class AdminService {
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Deletes a corporation by ID.
+     *
+     * @param corpId the ID of the corporation to delete
+     * @return a CompletableFuture containing the result of the operation
+     */
     @Async
     public CompletableFuture<String> deleteCorp(String corpId) {
         try {
@@ -97,6 +129,13 @@ public class AdminService {
         }
     }
 
+    /**
+     * Edits a corporation by ID.
+     *
+     * @param corpId the ID of the corporation to edit
+     * @param corpDto the CorpDTO containing the new information
+     * @return a CompletableFuture containing the result of the operation
+     */
     @Async
     public CompletableFuture<String> editCorpById(String corpId, CorpDTO corpDto) {
         try {
@@ -110,6 +149,13 @@ public class AdminService {
         }
     }
 
+    /**
+     * Edits a shop's password by ID.
+     *
+     * @param shopId the ID of the shop
+     * @param password the new password
+     * @return a CompletableFuture containing the result of the operation
+     */
     @Async
     public CompletableFuture<String> editShopById(String shopId, String password) {
         try {
@@ -120,6 +166,12 @@ public class AdminService {
         }
     }
 
+    /**
+     * Saves a list of shops.
+     *
+     * @param addShopDTO the list of AddShopDTOs to save
+     * @return a CompletableFuture containing a list of ShopInfoCacheDTOs
+     */
     @Async
     @Transactional
     public CompletableFuture<List<ShopInfoCacheDTO>> saveShop(List<AddShopDTO> addShopDTO) {
@@ -149,6 +201,12 @@ public class AdminService {
         }
     }
 
+    /**
+     * Saves an admin.
+     *
+     * @param adminDTO the AdminDTO to save
+     * @return a CompletableFuture representing the completion of the operation
+     */
     @Async
     public CompletableFuture<?> saveAdmin(AdminDTO adminDTO) {
         try {
@@ -163,6 +221,12 @@ public class AdminService {
         }
     }
 
+    /**
+     * Deletes a shop by ID.
+     *
+     * @param shopId the ID of the shop to delete
+     * @return a CompletableFuture containing the result of the operation
+     */
     @Async
     public CompletableFuture<String> deleteShop (String shopId) {
         try {
@@ -173,6 +237,11 @@ public class AdminService {
         }
     }
 
+    /**
+     * Retrieves all logged shops. Not used
+     *
+     * @return a CompletableFuture containing a list of ShopsDTOs
+     */
     @Async
     public CompletableFuture<List<ShopsDTO>> getAllLoggedShops() {
         return CompletableFuture
@@ -182,6 +251,12 @@ public class AdminService {
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Retrieves shop information by ID.
+     *
+     * @param shopId the ID of the shop
+     * @return a CompletableFuture containing the ShopsDTO
+     */
     @Async
     public CompletableFuture<ShopsDTO> getShopById(String shopId) {
         ShopsDTO dto = shopMapper.toDto(shopRepository.getShopByShopId(shopId)
@@ -192,6 +267,12 @@ public class AdminService {
                 .completedFuture(dto);
     }
 
+    /**
+     * Retrieves shop information.
+     *
+     * @param shopId the ID of the shop
+     * @return the ShopInfoCacheDTO
+     */
     private ShopInfoCacheDTO getShopInfo(String shopId) {
         Optional<ShopInfoCache> shopInfoCache = shopInfoCacheRepository.findById(shopId);
         if (shopInfoCache.isPresent()) return ShopInfoCachRepositoryMapper.INSTANCE.toDto(shopInfoCache.get());
@@ -203,6 +284,12 @@ public class AdminService {
         }
     }
 
+    /**
+     * Retrieves shop information from an external API.
+     *
+     * @param shopId the ID of the shop
+     * @return the ShopInfoCacheDTO from the external API
+     */
     public ShopInfoCacheDTO getShopInfoCacheDTOResponseEntity(String shopId) {
         String url = "https://api.apteki.ua/get_shop/" + shopId;
 

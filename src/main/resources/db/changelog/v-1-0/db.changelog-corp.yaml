@@ -29,3 +29,4 @@ databaseChangeLog:
               - column:
                   name: life_time
                   type: INTEGER
+            remarks: "Table for storing info about Corporations"

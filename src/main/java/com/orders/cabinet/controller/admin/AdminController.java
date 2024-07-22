@@ -19,7 +19,23 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
+/**
+ * Controller for admin operations related to shops and corporations.
+ *
+ * <p>This controller provides endpoints to manage shops and corporations, including adding, editing, and deleting them.</p>
+ *
+ * @version 1.0
+ * @since 2024-07-19
+ *
+ * @see AdminService
+ * @see CorpDTO
+ * @see AddShopDTO
+ * @see AdminDTO
+ * @see ShopsDTO
+ *
+ * @author Vasylenko Oleksii
+ * @company Proxima Research International
+ */
 @Slf4j
 @RestController
 @RequestMapping("${main.module.admin.panel}")
@@ -30,6 +46,12 @@ public class AdminController {
 
     AdminService service;
 
+    /**
+     * Adds a list of corporations.
+     *
+     * @param corpDTO the list of corporations to add
+     * @return a response entity indicating the result of the operation
+     */
     @PostMapping("${main.module.corps.add}")
     @Operation(summary = "Add corporation",
             description = "Only a user with Administrator access level can add",
@@ -54,6 +76,12 @@ public class AdminController {
                 });
     }
 
+    /**
+     * Adds a list of shops.
+     *
+     * @param shop the list of shops to add
+     * @return a response entity containing the result of the operation
+     */
     @PostMapping("${main.module.shops.add}")
     @Operation(summary = "Add shop",
             description = "Only a user with Administrator access level can add",
@@ -90,6 +118,12 @@ public class AdminController {
                 });
     }
 
+    /**
+     * Adds an administrator.
+     *
+     * @param adminDTO the administrator details to add
+     * @return a response entity indicating the result of the operation
+     */
     @PostMapping("${main.module.admin.add}")
     @Operation(summary = "Add administrator",
             description = "Only a user with Administrator access level can add",
@@ -114,6 +148,13 @@ public class AdminController {
                 });
     }
 
+    /**
+     * Edits a corporation by its ID.
+     *
+     * @param corpDTO the corporation details to edit
+     * @param corpId the ID of the corporation to edit
+     * @return a response entity indicating the result of the operation
+     */
     @PostMapping("${main.module.corps.edit}/{corpId}")
     @Operation(summary = "Edit corporation",
             description = "Only a user with Administrator access level can add. You can edit not only all fields, but also some separately",
@@ -132,6 +173,13 @@ public class AdminController {
                 .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage()));
     }
 
+    /**
+     * Edits a shop by its ID.
+     *
+     * @param password the new password for the shop
+     * @param shopId the ID of the shop to edit
+     * @return a response entity indicating the result of the operation
+     */
     @PostMapping("${main.module.shops.edit}/{shopId}")
     @Operation(summary = "Edit shop",
             description = "Only a user with Administrator access level can add. Can be edited only password",
@@ -149,6 +197,12 @@ public class AdminController {
                 .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage()));
     }
 
+    /**
+     * Deletes a shop by its ID.
+     *
+     * @param shopId the ID of the shop to delete
+     * @return a response entity indicating the result of the operation
+     */
     @PostMapping("${main.module.shops.delete}")
     @Operation(summary = "Delete shop",
             description = "Only a user with Administrator access level can add. Also, all orders that were linked to the store will be deleted",
@@ -166,6 +220,12 @@ public class AdminController {
                 .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage()));
     }
 
+    /**
+     * Deletes a corporation by its ID.
+     *
+     * @param corpId the ID of the corporation to delete
+     * @return a response entity indicating the result of the operation
+     */
     @PostMapping("${main.module.corps.delete}")
     @Operation(summary = "Delete corporation",
             description = "Only a user with Administrator access level can add. Also, all shops and orders that were linked to the corp will be deleted",
@@ -183,6 +243,12 @@ public class AdminController {
                 .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage()));
     }
 
+    /**
+     * Gets a shop by its ID.
+     *
+     * @param shopId the ID of the shop to retrieve
+     * @return a response entity containing the shop details
+     */
     @GetMapping("${main.module.shops.get}/{shopId}")
     @Operation(summary = "Get shop by ID",
             description = "Only a user with Administrator access level can add.",

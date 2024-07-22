@@ -39,7 +39,16 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
+/**
+ * Service for handling and updating orders based on received events and requests.
+ *
+ * <p>This service listens for order events, updates orders' states, and communicates with external systems to confirm, complete, or cancel orders.</p>
+ *
+ * @author Vasylenko Oleksii
+ * @company Proxima Research International
+ * @version 1.0
+ * @since 2024-07-19
+ */
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
@@ -62,6 +71,11 @@ public class UpdateOrderService {
     Map<String, List<Order>> orderMap = new HashMap<>();
     OrderWriterService orderWriterService;
 
+    /**
+     * Handles the {@link OrderReceivedEvent} by adding received orders to the internal map.
+     *
+     * @param event the {@link OrderReceivedEvent} containing the received orders.
+     */
     @EventListener
     public void handleOrderReceivedEvent(OrderReceivedEvent event) {
         Order[] newOrders = event.getOrder();
@@ -73,6 +87,13 @@ public class UpdateOrderService {
                 });
     }
 
+    /**
+     * Retrieves and removes new orders for a specific shop.
+     *
+     * @param shopId the ID of the shop for which to retrieve orders.
+     * @return a {@link CompletableFuture} containing a list of {@link OrderDTO} representing the orders.
+     * @throws NoSuchShopException if no orders are available for the specified shop ID.
+     */
     @Async
     public CompletableFuture<List<OrderDTO>> getOrdersWithOnlyNewStateByShopId(String shopId) {
         if (orderMap.get(shopId) != null) {
@@ -87,7 +108,13 @@ public class UpdateOrderService {
         }
     }
 
-
+    /**
+     * Confirms an order by updating its state and processing it.
+     *
+     * @param shopId the ID of the shop where the order is located.
+     * @param controllerDto the {@link ControllerDTO} containing order details.
+     * @return a {@link CompletableFuture} containing the updated state.
+     */
     @Async
     public CompletableFuture<?> confirmOrder(String shopId, ControllerDTO controllerDto) {
         try {
@@ -101,6 +128,13 @@ public class UpdateOrderService {
         }
     }
 
+    /**
+     * Completes an order by updating its state and processing it.
+     *
+     * @param shopId the ID of the shop where the order is located.
+     * @param controllerDto the {@link ControllerDTO} containing order details.
+     * @return a {@link CompletableFuture} containing the updated state.
+     */
     @Async
     public CompletableFuture<?> completeOrder(String shopId, ControllerDTO controllerDto) {
         try {
@@ -115,6 +149,13 @@ public class UpdateOrderService {
         }
     }
 
+    /**
+     * Cancels an order by updating its state and processing it.
+     *
+     * @param shopId the ID of the shop where the order is located.
+     * @param controllerDto the {@link ControllerDTO} containing order details.
+     * @return a {@link CompletableFuture} containing the updated state.
+     */
     @Async
     public CompletableFuture<?> cancelOrder(String shopId, ControllerDTO controllerDto) {
         try {
@@ -130,11 +171,23 @@ public class UpdateOrderService {
         }
     }
 
+    /**
+     * Saves the given order using the {@link OrderWriterService}.
+     *
+     * @param newOrder the {@link Order} to be saved.
+     */
     private void saveIt(Order newOrder) {
         newOrder.setTimestamp(Instant.now().getEpochSecond());
         orderWriterService.saveOrders(new Order[]{newOrder});
     }
 
+    /**
+     * Creates HTTP headers for the request including authorization and content type.
+     *
+     * @param username the username for authorization.
+     * @param password the password for authorization.
+     * @return the {@link HttpHeaders} to be used in the HTTP request.
+     */
     private HttpHeaders getHttpHeaders(String username, String password) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
@@ -143,12 +196,27 @@ public class UpdateOrderService {
         return headers;
     }
 
+    /**
+     * Creates an authorization header for basic authentication.
+     *
+     * @param username the username for authorization.
+     * @param password the password for authorization.
+     * @return the authorization header as a {@link String}.
+     */
     private String getAuthHeader(String username, String password) {
         String auth = username + ":" + password;
         byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.UTF_8));
         return "Basic " + new String(encodedAuth);
     }
 
+    /**
+     * Sends the order to an external system for processing.
+     *
+     * @param newOrder the {@link Order} to be processed.
+     * @throws IllegalStateException if the external system responds with an error.
+     * @throws IllegalArgumentException if there is an error processing JSON.
+     * @throws OrderOutOfDateException if the order is outdated and canceled by the external system.
+     */
     private void doPartyHard(Order newOrder) {
         Optional<Corp> corp = shopRepository.findCorpByShopId(newOrder.getIdShop());
         boolean noContent = false;
@@ -183,6 +251,15 @@ public class UpdateOrderService {
         }
     }
 
+    /**
+     * Constructs a new order state based on the provided shop ID and controller DTO.
+     *
+     * @param shopId the ID of the shop where the order is located.
+     * @param controllerDTO the {@link ControllerDTO} containing order details.
+     * @param state the new state to set for the order.
+     * @return the updated {@link Order}.
+     * @throws NoSuchElementException if the order or its state cannot be found.
+     */
     private Order getNewState(String shopId, ControllerDTO controllerDTO, String state) {
         Optional<OrderDb> tempOrder = orderRepository.findByShopIdAndOrderId(shopId, controllerDTO.getOrderId());
         if (tempOrder.isPresent()) {
@@ -215,6 +292,14 @@ public class UpdateOrderService {
         } else throw new NoSuchElementException("Can't find order " + controllerDTO.getOrderId() + " for shop ID: " + shopId);
     }
 
+    /**
+     * Adds a preparation item to an order.
+     *
+     * @param controllerDTO the {@link ControllerDTO} containing preparation details.
+     * @param lastState the last state of the order.
+     * @param k the index of the preparation item.
+     * @return the {@link OrderPreps} representing the preparation item.
+     */
     private OrderPreps addPrep(ControllerDTO controllerDTO, State lastState, int k) {
         String extId = "";
         for (PrepsInOrderDb prep: lastState.getPrepsInOrder()) {
