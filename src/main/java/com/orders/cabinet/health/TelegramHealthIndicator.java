@@ -10,8 +10,10 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.ConnectException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 /**
@@ -57,7 +59,7 @@ public class TelegramHealthIndicator implements HealthIndicator {
             String stringCompletableFuture = checkPingPong().get();
             if (stringCompletableFuture.equals("pong"))
                 return Health.up().withDetail("message", "Telegram is healthy").build();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             return Health.down().withDetail("message", "Telegram is ill").build();
         }
         return Health.down().withDetail("message", "Telegram is ill").build();
@@ -73,17 +75,21 @@ public class TelegramHealthIndicator implements HealthIndicator {
      */
     @Async
     public CompletableFuture<String> checkPingPong() {
+        ResponseEntity<String> exchange = null;
         String url = prop.getUrl() + prop.getPing();
 
         HttpEntity<?> request = new HttpEntity<>(getHeaders());
-
-        ResponseEntity<String> exchange = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                request,
-                new ParameterizedTypeReference<>() {
-                }
-        );
+        try {
+            exchange = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    request,
+                    new ParameterizedTypeReference<>() {
+                    }
+            );
+        } catch (ResourceAccessException ex) {
+            return CompletableFuture.failedFuture(ex);
+        }
 
         return CompletableFuture.completedFuture(exchange.getBody());
     }

@@ -28,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -183,17 +184,16 @@ public class AdminService {
                 if (exceptionShop.isPresent())
                     throw new SQLException(addShopDTO.get(i).getShopId() + " already exists in base!");
                 ShopInfoCacheDTO shopInfoCacheDTO = getShopInfo(addShopDTO.get(i).getShopId());
-                if (shopInfoCacheDTO != null) {
-                    Shops shop = shopMapper.toModel(ShopsDTO
-                            .builder()
-                            .shopId(addShopDTO.get(i).getShopId())
-                            .password(addShopDTO.get(i).getPassword())
-                            .corpId(addShopDTO.get(i).getCorpId())
-                            .build());
-                    shop.setRole(Role.SHOP);
-                    shopRepository.save(shop);
-                    result.add(shopInfoCacheDTO);
-                } else throw new NoSuchShopException("No shop " + addShopDTO.get(i).getShopId() + " in DB Geoapteki!");
+                Shops shop = shopMapper.toModel(ShopsDTO
+                        .builder()
+                        .shopId(addShopDTO.get(i).getShopId())
+                        .password(addShopDTO.get(i).getPassword())
+                        .corpId(addShopDTO.get(i).getCorpId())
+                        .build());
+                shop.setRole(Role.SHOP);
+                shopRepository.save(shop);
+                result.add(shopInfoCacheDTO);
+
             }
             return CompletableFuture.completedFuture(result);
         } catch (Exception e) {
@@ -213,6 +213,7 @@ public class AdminService {
             if (!adminRepository.existsByUsername(adminDTO.getUsername())) {
                 String rawPassword = adminDTO.getPassword();
                 adminDTO.setPassword(encoder.encode(rawPassword));
+                adminDTO.setRole(Role.ADMIN);
                 adminRepository.save(AdminMapper.INSTANCE.toModel(adminDTO));
                 return CompletableFuture.completedFuture("OK");
             } else return CompletableFuture.failedFuture(new SQLException("Admin with such username already exists!"));
@@ -278,8 +279,9 @@ public class AdminService {
         if (shopInfoCache.isPresent()) return ShopInfoCachRepositoryMapper.INSTANCE.toDto(shopInfoCache.get());
         else {
             ShopInfoCacheDTO response = getShopInfoCacheDTOResponseEntity(shopId);
-
-            shopInfoCacheRepository.save(ShopInfoCachRepositoryMapper.INSTANCE.toModel(response));
+            if (response != null)
+                shopInfoCacheRepository.save(ShopInfoCachRepositoryMapper.INSTANCE.toModel(response));
+            else throw new NoSuchShopException("No shop " + shopId + " in DB Geoapteki!");
             return response;
         }
     }

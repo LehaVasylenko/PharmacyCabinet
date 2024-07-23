@@ -6,12 +6,20 @@ import com.orders.cabinet.repository.DrugCacheRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Service for retrieving and caching drug names.
  *
@@ -23,13 +31,17 @@ import java.util.concurrent.CompletableFuture;
  * @version 1.0
  * @since 2024-07-19
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class DrugNameService {
 
-    DrugCacheRepository drugCacheRepository;
-    RestTemplate restTemplate;
+    final DrugCacheRepository drugCacheRepository;
+    final RestTemplate restTemplate;
+
+    @Value("${geoapteka.api.url}")
+    String apiUrl;
 
     /**
      * Retrieves the drug information based on the given drug ID.
@@ -48,20 +60,74 @@ public class DrugNameService {
         if (cachedDrug.isPresent()) {
             return CompletableFuture.completedFuture(cachedDrug.get());
         } else {
-            String url = "https://api.geoapteka.com.ua/get_item/" + drugId;
+            String url = apiUrl + "/get_item/" + drugId;
             DrugInfo drugInfo = restTemplate.getForObject(url, DrugInfo.class);
-            String drugName = (drugInfo != null) ? drugInfo.getDrugData() : "Unknown Drug";
-            String drugLink = (drugInfo != null) ? drugInfo.getDrugLink() : "";
             if (drugInfo != null) {
-                newCacheEntry = DrugCache.builder()
-                        .drugId(drugId)
-                        .drugName(drugName)
-                        .drugLink(drugLink)
-                        .build();
+                newCacheEntry = getdrugCache(drugInfo);
                 drugCacheRepository.save(newCacheEntry);
             }
             return CompletableFuture.completedFuture(newCacheEntry);
         }
+    }
+
+    @Async("taskExecutor")
+    public void setDrugNames(List<String> drugsId) {
+        List<DrugCache> result = new ArrayList<>();
+        List<String> baseList = drugCacheRepository.findAllDrugIds();
+        log.info("BaseList size: {}", baseList.size());
+
+        Set<String> baseSet = Set.copyOf(baseList);
+
+        List<String> missingIds = drugsId.stream()
+                .filter(id -> !baseSet.contains(id))
+                .toList();
+        log.info("MissingList size: {}", missingIds.size());
+
+        if (!missingIds.isEmpty()) {
+            //perform API call
+            List<DrugInfo> drugInfoList = getDrugInfo(missingIds);
+            if (!drugInfoList.isEmpty()) {
+                for (DrugInfo info: drugInfoList) {
+                    result.add(getdrugCache(info));
+                }
+                //write missing ID's to base
+                log.info("Written in base: {}", result.size());
+                drugCacheRepository.saveAll(result);
+            }
+        }
+    }
+
+    private DrugCache getdrugCache(DrugInfo info) {
+        return DrugCache.builder()
+                .drugId(info.getId())
+                .drugName(info.getDrugData())
+                .drugLink(info.getDrugLink())
+                .build();
+    }
+
+    public List<DrugInfo> getDrugInfo(List<String> drugIds) {
+        try {
+            HttpEntity<List<String>> request = new HttpEntity<>(drugIds, createHeaders());
+
+            DrugInfo[] responseArray = restTemplate
+                    .postForObject(apiUrl + "/get_item_many", request, DrugInfo[].class);
+
+            if (responseArray != null) {
+                log.info("Drug Info response: {}", responseArray.length);
+                return Arrays.stream(responseArray).filter(Objects::nonNull).toList();
+            }
+            else
+                return new ArrayList<>();
+        } catch (ResourceAccessException e) {
+            log.error("Failed to connect to the API", e);
+            return new ArrayList<>();
+        }
+    }
+
+    private HttpHeaders createHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
     }
 }
 

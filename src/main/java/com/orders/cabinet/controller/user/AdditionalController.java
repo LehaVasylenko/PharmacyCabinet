@@ -1,6 +1,7 @@
 package com.orders.cabinet.controller.user;
 
 import com.orders.cabinet.exception.NoSuchShopException;
+import com.orders.cabinet.model.api.PriceList;
 import com.orders.cabinet.model.api.dto.OrderDTO;
 import com.orders.cabinet.model.db.dto.ShopInfoCacheDTO;
 import com.orders.cabinet.service.AdditionalService;
@@ -11,16 +12,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 /**
@@ -172,13 +178,40 @@ public class AdditionalController {
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(List.of(OrderDTO
                             .builder()
-                            .idOrder(ex.getMessage())
-                            .phone(ex.getCause().getMessage())
-                            .time(ex.getLocalizedMessage())
+                            .errorMessage(ex.getLocalizedMessage())
                             .build())
                         )
                 );
     }
 
+    @PostMapping("/get-prop-by-string")
+    public CompletableFuture<ResponseEntity<List<PriceList>>> getPropByString(@NotEmpty @RequestBody String name, @AuthenticationPrincipal UserDetails userDetails) {
+        return additionalService.getDrugByName(userDetails.getUsername(), name)
+                .thenApply(ResponseEntity::ok)
+                .exceptionally(ex -> {
+                    Throwable cause = ex.getCause();
+                    if (cause instanceof IllegalArgumentException) {
+                        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(List.of(PriceList.builder()
+                                .drugId(ex.getCause().getMessage())
+                                .drugName(ex.getMessage())
+                                .errorMessage(ex.getLocalizedMessage())
+                                .build()));
+                    } else {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of(PriceList.builder()
+                                .drugId(ex.getCause().getMessage())
+                                .drugName(ex.getMessage())
+                                .errorMessage(ex.getLocalizedMessage())
+                                .build()));
+                    }
+                });
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, WebRequest request) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("errorMessage", "Required request body is missing or invalid");
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
 
 }

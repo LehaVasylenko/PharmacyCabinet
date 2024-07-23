@@ -102,17 +102,17 @@ public class AdminController {
                     if (ex.getCause() instanceof SQLException) {
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(List.of(ShopInfoCacheDTO
                                 .builder()
-                                        .shopId(ex.getCause().getMessage())
+                                .errorMessage(ex.getCause().getMessage())
                                 .build()));
                     } else if (ex.getCause() instanceof NoSuchShopException) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of(ShopInfoCacheDTO
                                 .builder()
-                                .shopId(ex.getCause().getMessage())
+                                .errorMessage(ex.getCause().getMessage())
                                 .build()));
                     } else {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of(ShopInfoCacheDTO
                                 .builder()
-                                .shopId(ex.getCause().getMessage())
+                                .errorMessage(ex.getCause().getMessage())
                                 .build()));
                     }
                 });
