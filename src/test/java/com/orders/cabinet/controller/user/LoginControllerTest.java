@@ -100,7 +100,6 @@ class LoginControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("1"));
 
-
         verify(service, times(1)).authentication(any(LoginDTO.class));
     }
 
