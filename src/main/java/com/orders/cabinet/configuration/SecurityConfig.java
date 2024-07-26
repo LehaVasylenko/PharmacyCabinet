@@ -1,17 +1,26 @@
 package com.orders.cabinet.configuration;
 
 import com.orders.cabinet.model.Role;
+import com.orders.cabinet.repository.ShopRepository;
 import com.orders.cabinet.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
+import org.springframework.security.web.session.DisableEncodeUrlFilter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 /**
@@ -45,6 +54,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
  * @version 1.0
  * @since 2024-07-19
  */
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -54,6 +64,9 @@ public class SecurityConfig {
      * Service used for loading user-specific data during authentication.
      */
     UserService userService;
+    PasswordEncoder encoder;
+    PopOrderProperties prop;
+    ShopRepository repo;
 
     /**
      * Configures HTTP security and access controls.
@@ -68,7 +81,7 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain web(HttpSecurity http) throws Exception {
-        http
+        http.addFilterAfter(new DeniedAccessFilter(prop, userService, encoder, repo), SwitchUserFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/api/admin/**").hasAuthority(Role.ADMIN.name())
@@ -79,9 +92,6 @@ public class SecurityConfig {
                         .requestMatchers("/user/login/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(sessionManagement ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
-                .userDetailsService(userService)
                 .httpBasic(withDefaults());
         return http.build();
     }

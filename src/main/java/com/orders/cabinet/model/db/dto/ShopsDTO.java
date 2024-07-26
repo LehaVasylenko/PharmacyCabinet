@@ -1,6 +1,7 @@
 package com.orders.cabinet.model.db.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.orders.cabinet.model.db.order.OrderDb;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
@@ -16,6 +17,7 @@ import java.util.List;
 @Setter
 @ToString(exclude = "orders")
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShopsDTO {
     @NotEmpty

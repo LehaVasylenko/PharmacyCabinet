@@ -1,7 +1,7 @@
 package com.orders.cabinet.controller.user;
 
 import com.orders.cabinet.exception.NoSuchShopException;
-import com.orders.cabinet.model.api.PriceList;
+import com.redis_loader.loader.model.PriceList;
 import com.orders.cabinet.model.api.dto.OrderDTO;
 import com.orders.cabinet.model.db.dto.ShopInfoCacheDTO;
 import com.orders.cabinet.service.AdditionalService;
@@ -65,16 +65,15 @@ public class AdditionalController {
             description = "Allowed for Shops. Returns list of orders corresponding to the pharmacy which ends with specified 4 symbols",
             tags = {"Get"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(implementation = ShopInfoCacheDTO.class))),
             @ApiResponse(responseCode = "204", description = "No orders were found",
                     content = @Content(
                     schema = @Schema(implementation = ShopInfoCacheDTO.class),
                     examples = @ExampleObject(value = """
                     [
                                    {
-                                     "phone": "Error message 1",
-                                     "time": "Error message 2",
-                                     "idOrder": "Error message 3",
+                                     "errorMessage": "Error message"
                                    }
                                  ]
                 """)
@@ -85,9 +84,7 @@ public class AdditionalController {
                             examples = @ExampleObject(value = """
                     [
                                    {
-                                     "phone": "Error message 1",
-                                     "time": "Error message 2",
-                                     "idOrder": "Error message 3",
+                                     "errorMessage": "Error message"
                                    }
                                  ]
                 """)
@@ -102,9 +99,7 @@ public class AdditionalController {
                             examples = @ExampleObject(value = """
                     [
                                    {
-                                     "phone": "Error message 1",
-                                     "time": "Error message 2",
-                                     "idOrder": "Error message 3",
+                                     "errorMessage": "Error message"
                                    }
                                  ]
                 """)
@@ -119,23 +114,17 @@ public class AdditionalController {
                     if (cause instanceof NoSuchShopException) {
                         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(List.of(OrderDTO
                                 .builder()
-                                    .idOrder(ex.getMessage())
-                                    .phone(ex.getCause().getMessage())
-                                    .time(ex.getLocalizedMessage())
+                                    .errorMessage(ex.getLocalizedMessage())
                                 .build()));
                     } else if (cause instanceof NoSuchElementException || cause instanceof IllegalArgumentException) {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(OrderDTO
                                 .builder()
-                                    .idOrder(ex.getMessage())
-                                    .phone(ex.getCause().getMessage())
-                                    .time(ex.getLocalizedMessage())
+                                    .errorMessage(ex.getLocalizedMessage())
                                 .build()));
                     } else {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of(OrderDTO
                                 .builder()
-                                    .idOrder(ex.getMessage())
-                                    .phone(ex.getCause().getMessage())
-                                    .time(ex.getLocalizedMessage())
+                                    .errorMessage(ex.getLocalizedMessage())
                                 .build()));
                     }
                 });
@@ -163,9 +152,7 @@ public class AdditionalController {
                             examples = @ExampleObject(value = """
                     [
                                    {
-                                     "phone": "Error message 1",
-                                     "time": "Error message 2",
-                                     "idOrder": "Error message 3",
+                                     "errorMessage": "Error message"
                                    }
                                  ]
                 """)
@@ -178,29 +165,27 @@ public class AdditionalController {
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(List.of(OrderDTO
                             .builder()
-                            .errorMessage(ex.getLocalizedMessage())
+                                .errorMessage(ex.getLocalizedMessage())
                             .build())
                         )
                 );
     }
 
     @PostMapping("/get-prop-by-string")
-    public CompletableFuture<ResponseEntity<List<PriceList>>> getPropByString(@NotEmpty @RequestBody String name, @AuthenticationPrincipal UserDetails userDetails) {
+    public CompletableFuture<ResponseEntity<List<PriceList>>> getPropByString(@AuthenticationPrincipal UserDetails userDetails, @NotEmpty @RequestBody String name) {
         return additionalService.getDrugByName(userDetails.getUsername(), name)
                 .thenApply(ResponseEntity::ok)
                 .exceptionally(ex -> {
                     Throwable cause = ex.getCause();
                     if (cause instanceof IllegalArgumentException) {
-                        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(List.of(PriceList.builder()
-                                .drugId(ex.getCause().getMessage())
-                                .drugName(ex.getMessage())
-                                .errorMessage(ex.getLocalizedMessage())
+                        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(List.of(PriceList
+                                .builder()
+                                    .errorMessage(ex.getLocalizedMessage())
                                 .build()));
                     } else {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of(PriceList.builder()
-                                .drugId(ex.getCause().getMessage())
-                                .drugName(ex.getMessage())
-                                .errorMessage(ex.getLocalizedMessage())
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of(PriceList
+                                .builder()
+                                    .errorMessage(ex.getLocalizedMessage())
                                 .build()));
                     }
                 });

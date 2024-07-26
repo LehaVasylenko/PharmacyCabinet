@@ -258,16 +258,22 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
             @ApiResponse(responseCode = "401", description = "Not authorized"),
             @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "404", description = "Shop not found"),
             @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
     })
     public CompletableFuture<ResponseEntity<ShopsDTO>> getByShopId(@PathVariable String shopId) {
         return service.getShopById(shopId)
                 .thenApply(ResponseEntity::ok)
-                .exceptionally(ex -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ShopsDTO
-                        .builder()
-                                .shopId(ex.getCause().getMessage())
-                                .corpId(ex.getMessage())
-                                .password(ex.getLocalizedMessage())
-                        .build()));
+                .exceptionally(ex -> {
+                    if (ex.getCause() instanceof NoSuchShopException) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ShopsDTO
+                                .builder()
+                                .errorMessage(ex.getMessage())
+                                .build());
+                    } else return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ShopsDTO
+                            .builder()
+                            .errorMessage(ex.getLocalizedMessage())
+                            .build());
+                });
     }
 }

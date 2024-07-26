@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: 10
+      author: Vasylenko_O
+      changes:
+        - sql:
+            # Create the view if it does not already exist
+            sql: |
+              CREATE VIEW shop_status_view AS
+              SELECT shop_id, logged FROM shops;
+
+        - sql:
+            # Create the trigger function
+            sql: |
+              CREATE OR REPLACE FUNCTION update_shop_status_view()
+              RETURNS TRIGGER AS $$
+              BEGIN
+                  INSERT INTO shop_status_view (shop_id, logged)
+                  VALUES (NEW.shop_id, NEW.logged)
+                  ON CONFLICT (shop_id) DO UPDATE
+                  SET logged = EXCLUDED.logged;
+                  RETURN NEW;
+              END
+              $$ LANGUAGE plpgsql;
+
+        - sql:
+            # Create the trigger
+            sql: |
+              CREATE TRIGGER shop_status_update
+              AFTER INSERT OR UPDATE ON shops
+              FOR EACH ROW
+              EXECUTE FUNCTION update_shop_status_view();

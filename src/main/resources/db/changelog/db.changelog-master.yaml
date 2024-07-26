@@ -17,3 +17,5 @@ databaseChangeLog:
       file: db/changelog/v-1-0/db.changelog-states.yaml
   - include:
       file: db/changelog/v-1-0/db.changelog-preps_in_order.yaml
+  - include:
+      file: db/changelog/v-1-0/db.changelog-view.yaml

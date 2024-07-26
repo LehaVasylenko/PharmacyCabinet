@@ -56,7 +56,6 @@ class LoginControllerTest {
     ObjectMapper mapper;
 
     String loginPath;
-    String user;
 
     @BeforeEach
     void init() {
@@ -65,7 +64,6 @@ class LoginControllerTest {
                 .build();
         mapper = new ObjectMapper();
         loginPath = PropertiesUtil.get("user.login.basePath");
-        user = "testUser";
     }
 
     @Test
