@@ -18,7 +18,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Service for retrieving and caching drug names.
@@ -60,7 +59,7 @@ public class DrugNameService {
         if (cachedDrug.isPresent()) {
             return CompletableFuture.completedFuture(cachedDrug.get());
         } else {
-            String url = apiUrl + "/get_item/" + drugId;
+            String url = new StringBuilder().append(apiUrl).append("/get_item/").append(drugId).toString();
             DrugInfo drugInfo = restTemplate.getForObject(url, DrugInfo.class);
             if (drugInfo != null) {
                 newCacheEntry = getdrugCache(drugInfo);

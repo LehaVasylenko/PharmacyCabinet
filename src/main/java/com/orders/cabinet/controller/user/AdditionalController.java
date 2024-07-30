@@ -1,11 +1,13 @@
 package com.orders.cabinet.controller.user;
 
+import com.orders.cabinet.event.Timed;
 import com.orders.cabinet.exception.NoSuchShopException;
-import com.redis_loader.loader.model.PriceList;
+import com.orders.cabinet.model.api.PriceList;
 import com.orders.cabinet.model.api.dto.OrderDTO;
 import com.orders.cabinet.model.db.dto.ShopInfoCacheDTO;
 import com.orders.cabinet.service.AdditionalService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,6 +18,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -43,6 +46,7 @@ import java.util.concurrent.CompletableFuture;
  * @author Vasylenko Oleksii
  * @company Proxima Research International
  */
+@Slf4j
 @RestController
 @RequestMapping("${user.additional}")
 @RequiredArgsConstructor
@@ -66,10 +70,10 @@ public class AdditionalController {
             tags = {"Get"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(implementation = ShopInfoCacheDTO.class))),
+                    content = @Content(schema = @Schema(implementation = OrderDTO.class))),
             @ApiResponse(responseCode = "204", description = "No orders were found",
                     content = @Content(
-                    schema = @Schema(implementation = ShopInfoCacheDTO.class),
+                    schema = @Schema(implementation = OrderDTO.class),
                     examples = @ExampleObject(value = """
                     [
                                    {
@@ -80,22 +84,55 @@ public class AdditionalController {
             )),
             @ApiResponse(responseCode = "400", description = "Bad request. Something wrong",
                     content = @Content(
-                            schema = @Schema(implementation = ShopInfoCacheDTO.class),
+                            schema = @Schema(implementation = OrderDTO.class),
                             examples = @ExampleObject(value = """
                     [
                                    {
                                      "errorMessage": "Error message"
                                    }
-                                 ]
+                    ]
                 """)
                     )),
             @ApiResponse(responseCode = "401", description = "Not authorized",
                     content = @Content(
                             examples = @ExampleObject(value = "     ")
                     )),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request..",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body",
                     content = @Content(
-                            schema = @Schema(implementation = ShopInfoCacheDTO.class),
+                            schema = @Schema(implementation = OrderDTO.class),
                             examples = @ExampleObject(value = """
                     [
                                    {
@@ -143,12 +180,47 @@ public class AdditionalController {
             description = "Allowed for Shops. Returns list of orders corresponding to the pharmacy",
             tags = {"Get"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(
+                            schema = @Schema(implementation = OrderDTO.class))),
             @ApiResponse(responseCode = "400", description = "Bad request. Something wrong"),
             @ApiResponse(responseCode = "401", description = "Not authorized"),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body",
                     content = @Content(
-                            schema = @Schema(implementation = ShopInfoCacheDTO.class),
+                            schema = @Schema(implementation = OrderDTO.class),
                             examples = @ExampleObject(value = """
                     [
                                    {
@@ -170,8 +242,63 @@ public class AdditionalController {
                         )
                 );
     }
-
+    @Timed
     @PostMapping("/get-prop-by-string")
+    @Operation(summary = "Find all drugs in shop by first symbols",
+            description = "Allowed for Shops. Returns list of drugs corresponding to the pharmacy and first symbols",
+            tags = {"Get"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(
+                            array = @ArraySchema(
+                                    schema = @Schema(implementation = PriceList.class)
+                            ))),
+            @ApiResponse(responseCode = "400", description = "Bad request. Something wrong"),
+            @ApiResponse(responseCode = "401", description = "Not authorized"),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                    [
+                                   {
+                                     "errorMessage": "Error message"
+                                   }
+                                 ]
+                """)
+                    ))
+    })
     public CompletableFuture<ResponseEntity<List<PriceList>>> getPropByString(@AuthenticationPrincipal UserDetails userDetails, @NotEmpty @RequestBody String name) {
         return additionalService.getDrugByName(userDetails.getUsername(), name)
                 .thenApply(ResponseEntity::ok)
@@ -198,5 +325,4 @@ public class AdditionalController {
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
-
 }

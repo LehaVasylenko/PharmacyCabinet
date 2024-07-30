@@ -45,7 +45,10 @@ public class ShopMapper {
     public Shops toModel(ShopsDTO shopsDto) {
         Corp corp = repository
                 .getCorpByCorpId(shopsDto.getCorpId())
-                .orElseThrow(() -> new NoSuchShopException("No corp with ID: " + shopsDto.getCorpId() + " were found in DB!"));
+                .orElseThrow(() -> new NoSuchShopException(new StringBuilder()
+                        .append("No corp with ID: ")
+                        .append(shopsDto.getCorpId())
+                        .append(" were found in DB!")));
         return Shops.builder()
                 .shopId(shopsDto.getShopId())
                 .corp(corp)

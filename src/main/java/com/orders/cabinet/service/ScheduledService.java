@@ -81,7 +81,7 @@ public class ScheduledService {
      * <p>This method is scheduled to run at a fixed rate (every 10 seconds) and
      * processes orders for each available shop asynchronously.</p>
      */
-    @Scheduled(fixedRateString = "${pop-order.rate}")
+    @Scheduled(cron = "${pop-order.rate}")
     //@Scheduled(fixedRate = 10000)
     public void makeRequest() {
 
@@ -174,7 +174,7 @@ public class ScheduledService {
      * @return the authorization header as a {@link String}.
      */
     private String getAuthHeader(String username, String password) {
-        String auth = username + ":" + password;
+        String auth = new StringBuilder().append(username).append(":").append(password).toString();
         byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.UTF_8));
         return "Basic " + new String(encodedAuth);
     }

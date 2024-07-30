@@ -4,6 +4,8 @@ import com.orders.cabinet.exception.NoSuchShopException;
 import com.orders.cabinet.model.db.dto.*;
 import com.orders.cabinet.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -61,7 +63,40 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
             @ApiResponse(responseCode = "401", description = "Not authorized"),
             @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "409", description = "Such corp already exists"),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
     })
     public CompletableFuture<ResponseEntity<String>> addCorp(@Valid @RequestBody List<CorpDTO> corpDTO) {
@@ -92,7 +127,40 @@ public class AdminController {
             @ApiResponse(responseCode = "401", description = "Not authorized"),
             @ApiResponse(responseCode = "403", description = "Wrong access level"),
             @ApiResponse(responseCode = "404", description = "Shop with such ID doesn't exists in https://api.geoapteka.com.ua/show-shops"),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "409", description = "Such shop already exists"),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
     })
     public CompletableFuture<ResponseEntity<List<ShopInfoCacheDTO>>> addShop(@Valid @RequestBody List<AddShopDTO> shop) {
@@ -113,6 +181,7 @@ public class AdminController {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of(ShopInfoCacheDTO
                                 .builder()
                                 .errorMessage(ex.getCause().getMessage())
+                                .shopId(ex.getClass().getName())
                                 .build()));
                     }
                 });
@@ -133,7 +202,40 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
             @ApiResponse(responseCode = "401", description = "Not authorized"),
             @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "409", description = "Admin with such username already exists"),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
     })
     public CompletableFuture<ResponseEntity<String>> addAdmin(@Valid @RequestBody AdminDTO adminDTO) {
@@ -164,6 +266,39 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
             @ApiResponse(responseCode = "401", description = "Not authorized"),
             @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
     })
     public CompletableFuture<ResponseEntity<String>> editCorp(@Valid @RequestBody CorpDTO corpDTO, @PathVariable String corpId) {
@@ -189,6 +324,39 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
             @ApiResponse(responseCode = "401", description = "Not authorized"),
             @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
     })
     public CompletableFuture<ResponseEntity<String>> editShop(@RequestBody String password, @PathVariable String shopId) {
@@ -212,6 +380,39 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
             @ApiResponse(responseCode = "401", description = "Not authorized"),
             @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
     })
     public CompletableFuture<ResponseEntity<String>> deleteShop(@RequestBody String shopId) {
@@ -235,6 +436,39 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "Bad request. Something wrong with field data types"),
             @ApiResponse(responseCode = "401", description = "Not authorized"),
             @ApiResponse(responseCode = "403", description = "Wrong access level"),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
     })
     public CompletableFuture<ResponseEntity<String>> deleteCorp(@RequestBody String corpId) {
@@ -259,6 +493,39 @@ public class AdminController {
             @ApiResponse(responseCode = "401", description = "Not authorized"),
             @ApiResponse(responseCode = "403", description = "Wrong access level"),
             @ApiResponse(responseCode = "404", description = "Shop not found"),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
     })
     public CompletableFuture<ResponseEntity<ShopsDTO>> getByShopId(@PathVariable String shopId) {

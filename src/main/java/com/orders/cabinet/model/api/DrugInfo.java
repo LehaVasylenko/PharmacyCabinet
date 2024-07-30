@@ -209,10 +209,23 @@ public class DrugInfo {
      * @return A formatted string with drug information.
      */
     public String getDrugData() {
-        String info = this.nameUa + " " + this.doseUa + " " + this.formUa + " " + this.packUa;
-        info += " " + this.packNoteUa + ", №" + this.numb + ", " + this.makeUa;
+        StringBuilder infoBuilder = new StringBuilder();
 
-        return info;
+        infoBuilder.append(this.nameUa)
+                .append(" ")
+                .append(this.doseUa)
+                .append(" ")
+                .append(this.formUa)
+                .append(" ")
+                .append(this.packUa)
+                .append(" ")
+                .append(this.packNoteUa)
+                .append(", №")
+                .append(this.numb)
+                .append(", ")
+                .append(this.makeUa);
+
+        return infoBuilder.toString();
     }
 
     /**
@@ -223,6 +236,14 @@ public class DrugInfo {
      * @return A formatted string with drug link to Compendium.
      */
     public String getDrugLink() {
-        return "https://compendium.com.ua/info/" + this.idInfo + "/" + this.id + "/";
+        StringBuilder linkBuilder = new StringBuilder();
+
+        linkBuilder.append("https://compendium.com.ua/info/")
+                .append(this.idInfo)
+                .append("/")
+                .append(this.id)
+                .append("/");
+
+        return linkBuilder.toString();
     }
 }

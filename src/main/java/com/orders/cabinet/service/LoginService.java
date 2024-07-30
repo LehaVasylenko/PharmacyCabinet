@@ -26,6 +26,7 @@ import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 /**
@@ -49,6 +50,7 @@ public class LoginService {
     UserService userService;
     ShopInfoCacheRepository shopInfoCacheRepository;
     ShopRepository shopRepository;
+    PriceListLoaderService loaderService;
 
     /**
      * Authenticates a shop based on provided login details.
@@ -74,9 +76,15 @@ public class LoginService {
 
         Optional<ShopInfoCache> byId = shopInfoCacheRepository.findById(loginDto.getShopId());
         if (byId.isEmpty())
-            return CompletableFuture.failedFuture(new NoSuchShopException("No such shop " + loginDto.getShopId() + " in Geoapteka DB!"));
+            return CompletableFuture.failedFuture(new NoSuchShopException(new StringBuilder("No such shop ").append(loginDto.getShopId()).append(" in Geoapteka DB!")));
         else {
+            try {
+                loaderService.setCacheForPriceListByShop(loginDto.getShopId());
+            } catch (ExecutionException | InterruptedException e) {
+                log.error("Can't load prise list for '{}': {}", loginDto.getShopId(), e.getMessage());
+            }
             shopRepository.updateLoggedIn(loginDto.getShopId(), true);
+            shopRepository.flush();
             return CompletableFuture.completedFuture(ShopInfoCachRepositoryMapper.INSTANCE.toDto(byId.get()));
         }
     }
@@ -113,7 +121,7 @@ public class LoginService {
         if (byId.isEmpty()) throw new NoSuchShopException("No shop with ID " + shopId);
         else {
             Shops shops = byId.get();
-            if (!shops.isLogged()) throw new IllegalStateException("Shop " + shopId + " already logged out");
+            if (!shops.isLogged()) throw new IllegalStateException(new StringBuilder().append("Shop ").append(shopId).append(" already logged out").toString());
             else shopRepository.updateLoggedIn(shopId, false);
         }
     }

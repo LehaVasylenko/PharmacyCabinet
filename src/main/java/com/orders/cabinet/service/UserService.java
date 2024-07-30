@@ -1,5 +1,6 @@
 package com.orders.cabinet.service;
 
+import com.orders.cabinet.event.Timed;
 import com.orders.cabinet.model.Role;
 import com.orders.cabinet.model.db.Admin;
 import com.orders.cabinet.model.db.Shops;
@@ -52,6 +53,7 @@ public class UserService implements UserDetailsService {
      * @return a {@link UserDetails} object representing the user.
      * @throws UsernameNotFoundException if no user with the provided username is found.
      */
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info(username);
@@ -98,4 +100,20 @@ public class UserService implements UserDetailsService {
            log.info("Default admin created: {}", defaultAdmin);
         } else log.info("Default admin already exists!");
     }
+
+//    @PostConstruct
+//    public void createDefaultShop() {
+//        String defaultShopName = "111111";
+//
+//        if (shopRepository.getShopByShopId(defaultShopName).isEmpty()) {
+//            Shops defaultShop = Shops.builder()
+//                    .shopId(defaultShopName)
+//                    .password(passwordEncoder.encode(defaultShopName))
+//                    .role(Role.SHOP)
+//                    .logged(true)
+//                    .build();
+//            shopRepository.save(defaultShop);
+//            log.info("Default shop created: {}", defaultShop);
+//        } else log.info("Default shop already exists!");
+//    }
 }

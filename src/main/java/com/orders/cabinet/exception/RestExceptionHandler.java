@@ -1,6 +1,7 @@
 package com.orders.cabinet.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.sql.SQLException;
@@ -19,8 +21,17 @@ import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 @RestControllerAdvice
 public class RestExceptionHandler {
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<CustomErrorResponse> handleResponseStatusException(ResponseStatusException ex) {
+        CustomErrorResponse errorResponse = new CustomErrorResponse(ex.getReason());
+        log.error("Hi! It is handleResponseStatusException");
+        return new ResponseEntity<>(errorResponse, ex.getStatusCode());
+    }
+
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {

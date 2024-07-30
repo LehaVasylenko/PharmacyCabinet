@@ -52,7 +52,7 @@ public class EntityAuditListener {
     @PrePersist
     public void onPrePersist(Object entity) {
         // Log or audit creation event
-        log.info("Entity created: " + entity.toString());
+//        log.info("Entity created: " + entity.toString());
         saveLog(entity, "CREATED");
     }
 
@@ -82,7 +82,7 @@ public class EntityAuditListener {
     @PreUpdate
     public void onPreUpdate(Object entity) {
         // Log or audit update event
-        log.info("Entity updated: " + entity.toString());
+//        log.info("Entity updated: " + entity.toString());
         saveLog(entity, "UPDATED");
     }
 
@@ -97,7 +97,7 @@ public class EntityAuditListener {
     @PreRemove
     public void onPreRemove(Object entity) {
         // Log or audit deletion event
-        log.info("Entity deleted: " + entity.toString());
+//        log.info("Entity deleted: " + entity.toString());
         saveLog(entity, "DELETED");
     }
 }

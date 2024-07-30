@@ -78,6 +78,39 @@ public class OrderManipulationController {
                     content = @Content(
                             examples = @ExampleObject(value = "    ")
                     )),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Need to explore",
                     content = @Content(
                             schema = @Schema(implementation = OrderDTO.class),
@@ -189,6 +222,10 @@ public class OrderManipulationController {
                     content = @Content(
                             examples = @ExampleObject(value = "    ")
                     )),
+            @ApiResponse(responseCode = "208", description = "Trying to change statuses 'Completed' or 'Canceled'",
+                    content = @Content(
+                            examples = @ExampleObject(value = "Houston, we have problems!")
+                    )),
             @ApiResponse(responseCode = "400", description = "Bad request. Something wrong",
                     content = @Content(
                             examples = @ExampleObject(value = "Houston, we have problems!")
@@ -197,7 +234,18 @@ public class OrderManipulationController {
                     content = @Content(
                             examples = @ExampleObject(value = "    ")
                     )),
-            @ApiResponse(responseCode = "405", description = "Trying to change statuses 'Completed' or 'Canceled'",
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "408", description = "Order expired",
                     content = @Content(
                             examples = @ExampleObject(value = "Houston, we have problems!")
                     )),
@@ -205,9 +253,27 @@ public class OrderManipulationController {
                     content = @Content(
                             examples = @ExampleObject(value = "Houston, we have problems!")
                     )),
-            @ApiResponse(responseCode = "418", description = "Order expired",
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
                     content = @Content(
-                            examples = @ExampleObject(value = "Houston, we have problems!")
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
                     )),
             @ApiResponse(responseCode = "500", description = "Some error. Need to explore",
                     content = @Content(
@@ -222,11 +288,11 @@ public class OrderManipulationController {
                     if (ex.getCause() instanceof SQLException) {
                         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getCause().getMessage());
                     } else if (ex.getCause() instanceof NoSuchElementException) {
-                        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ex.getCause().getMessage());
+                        return ResponseEntity.status(HttpStatus.ALREADY_REPORTED).body(ex.getCause().getMessage());
                     }  else if (ex.getCause() instanceof IllegalStateException || ex.getCause() instanceof IllegalArgumentException) {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getCause().getMessage());
                     } else if (ex.getCause() instanceof OrderOutOfDateException) {
-                        return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body(ex.getCause().getMessage());
+                        return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(ex.getCause().getMessage());
                     } else {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
                     }
@@ -253,6 +319,10 @@ public class OrderManipulationController {
                     content = @Content(
                             examples = @ExampleObject(value = "    ")
                     )),
+            @ApiResponse(responseCode = "208", description = "Trying to change statuses 'Completed' or 'Canceled'",
+                    content = @Content(
+                            examples = @ExampleObject(value = "Houston, we have problems!")
+                    )),
             @ApiResponse(responseCode = "400", description = "Bad request. Something wrong",
                     content = @Content(
                             examples = @ExampleObject(value = "Houston, we have problems!")
@@ -261,7 +331,18 @@ public class OrderManipulationController {
                     content = @Content(
                             examples = @ExampleObject(value = "    ")
                     )),
-            @ApiResponse(responseCode = "405", description = "Trying to change statuses 'Completed' or 'Canceled'",
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "408", description = "Order expired",
                     content = @Content(
                             examples = @ExampleObject(value = "Houston, we have problems!")
                     )),
@@ -269,9 +350,27 @@ public class OrderManipulationController {
                     content = @Content(
                             examples = @ExampleObject(value = "Houston, we have problems!")
                     )),
-            @ApiResponse(responseCode = "418", description = "Order expired",
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
                     content = @Content(
-                            examples = @ExampleObject(value = "Houston, we have problems!")
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
                     )),
             @ApiResponse(responseCode = "500", description = "Some error. Need to explore",
                     content = @Content(

@@ -55,6 +55,6 @@ public class PopOrderProperties {
     /**
      * Rate to ask pop-order about new orders
      */
-    long rate;
+    String rate;
 
 }

@@ -20,9 +20,9 @@
         </encoder>
     </appender>
 
-    <logger name="org.hibernate.SQL" level="DEBUG"/>
+<!--    <logger name="org.hibernate.SQL" level="DEBUG"/>-->
+    
     <logger name="org.springframework.security" level="TRACE"/>
-
     <logger name="com.orders.cabinet.controller" level="TRACE"/>
     <logger name="com.orders.cabinet.service" level="TRACE"/>
 

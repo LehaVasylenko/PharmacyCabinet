@@ -266,7 +266,7 @@ public class UpdateOrderService {
             OrderDb oldOrder = tempOrder.get();
             State lastState = oldOrder.getStates().get(oldOrder.getStates().size() - 1);
             if (lastState.getState().equals(states.getCancel()) || lastState.getState().equals(states.getComlete()))
-                throw new NoSuchElementException("States '" + states + "' or '" + states.getComlete() + "' can't be changed!");
+                throw new NoSuchElementException(new StringBuilder().append("States '").append(states).append("' or '").append(states.getComlete()).append("' can't be changed!").toString());
 
             List<OrderPreps> preps = new ArrayList<>();
             for (int i = 0; i < controllerDTO.getConfirmedPreps().size(); i++) {
@@ -289,7 +289,11 @@ public class UpdateOrderService {
                     .shipping(oldOrder.getShipping())
                     .data(preps)
                     .build();
-        } else throw new NoSuchElementException("Can't find order " + controllerDTO.getOrderId() + " for shop ID: " + shopId);
+        } else throw new NoSuchElementException(new StringBuilder()
+                .append("Can't find order ")
+                .append(controllerDTO.getOrderId())
+                .append(" for shop ID: ")
+                .append(shopId).toString());
     }
 
     /**

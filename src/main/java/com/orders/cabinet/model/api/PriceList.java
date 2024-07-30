@@ -1,11 +1,10 @@
-package com.redis_loader.loader.model;
+package com.orders.cabinet.model.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.redis.core.RedisHash;
 
 import java.io.Serializable;
 
@@ -16,7 +15,6 @@ import java.io.Serializable;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@RedisHash
 public class PriceList implements Serializable {
     @JsonProperty("id_drug")
     String drugId;

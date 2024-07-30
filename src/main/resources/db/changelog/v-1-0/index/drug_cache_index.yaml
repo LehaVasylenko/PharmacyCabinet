@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 12
+      author: Vasylenko_O
+      changes:
+        - createIndex:
+            indexName: idx_drug_id
+            tableName: drug_cache
+            columns:
+              - column:
+                  name: drug_id
+            unique: true

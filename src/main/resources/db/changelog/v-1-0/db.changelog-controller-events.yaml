@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 11
+      author: Vasylenko_O
+      changes:
+        - createTable:
+            tableName: log_controllers
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: controller_event
+                  type: TEXT
+            remarks: "Table for log events on controllers"

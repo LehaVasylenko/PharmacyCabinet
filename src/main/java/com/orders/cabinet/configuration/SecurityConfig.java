@@ -10,6 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -81,19 +84,28 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain web(HttpSecurity http) throws Exception {
-        http.addFilterAfter(new DeniedAccessFilter(prop, userService, encoder, repo), SwitchUserFilter.class)
+        log.info("Configuring SecurityFilterChain...");
+        DeniedAccessFilter deniedAccessFilter = new DeniedAccessFilter(prop, userService, encoder, repo);
+        log.info("DeniedAccessFilter created: {}", deniedAccessFilter);
+
+        http.addFilterAfter(deniedAccessFilter, SwitchUserFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/api/admin/**").hasAuthority(Role.ADMIN.name())
                         .requestMatchers("/api/shops/**").hasAuthority(Role.SHOP.name())
                         .requestMatchers("/actuator/**").hasAuthority(Role.ADMIN.name())
-                        .requestMatchers("/v3/**").permitAll()
-                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/v3/**").hasAuthority(Role.ADMIN.name())
+                        .requestMatchers("/swagger-ui/**").hasAuthority(Role.ADMIN.name())
+                        .requestMatchers("/swagger**").hasAuthority(Role.ADMIN.name())
                         .requestMatchers("/user/login/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .httpBasic(withDefaults());
         return http.build();
     }
+
+
 }
 

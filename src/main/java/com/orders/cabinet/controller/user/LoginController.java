@@ -104,6 +104,39 @@ public class LoginController {
                     }
                 """)
                     )),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Need to explore",
                     content = @Content(
                             schema = @Schema(implementation = ShopInfoCacheDTO.class),
@@ -153,6 +186,39 @@ public class LoginController {
             @ApiResponse(responseCode = "400", description = "Bad request. Something wrong"),
             @ApiResponse(responseCode = "401", description = "Not authorized"),
             @ApiResponse(responseCode = "404", description = "No shop with such ID was found"),
+            @ApiResponse(responseCode = "405", description = "Method Not Allowed - The request method is known by the server but is not supported by the target resource.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:41:00.000+00:00",
+                    "status": 405,
+                    "error": "Method Not Allowed",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "418", description = "I'm a teapot - The server refuses the attempt to brew coffee with a teapot. User forgot to specify User-Agent for the request",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:38:56.583+00:00",
+                    "status": 418,
+                    "error": "I'm a teapot",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
+            @ApiResponse(responseCode = "424", description = "Failed Dependency - Inappropriate User-Agent for the request.",
+                    content = @Content(
+                            examples = @ExampleObject(value = """
+                {
+                    "timestamp": "2024-07-29T13:39:13.642+00:00",
+                    "status": 424,
+                    "error": "Failed Dependency",
+                    "path": "/more/get-prop-by-string"
+                }
+                """)
+                    )),
             @ApiResponse(responseCode = "500", description = "Some error. Error message should be in response body")
     })
     public CompletableFuture<ResponseEntity<String>> logout(@AuthenticationPrincipal UserDetails userDetails) {

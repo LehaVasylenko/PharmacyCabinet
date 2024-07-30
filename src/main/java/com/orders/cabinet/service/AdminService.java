@@ -10,6 +10,7 @@ import com.orders.cabinet.model.db.Corp;
 import com.orders.cabinet.model.db.ShopInfoCache;
 import com.orders.cabinet.model.db.Shops;
 import com.orders.cabinet.model.db.dto.*;
+import com.orders.cabinet.model.db.order.OrderDb;
 import com.orders.cabinet.repository.AdminRepository;
 import com.orders.cabinet.repository.CorpRepository;
 import com.orders.cabinet.repository.ShopInfoCacheRepository;
@@ -72,7 +73,7 @@ public class AdminService {
             for (int i = 0; i < corpDTO.size(); i++) {
                 Optional<Corp> exceptionCorp = corpRepository.getCorpByCorpId(corpDTO.get(i).getCorpId());
                 if (exceptionCorp.isPresent())
-                    throw new SQLException(corpDTO.get(i).getCorpId() + " already exists in base!");
+                    throw new SQLException(new StringBuilder().append(corpDTO.get(i).getCorpId()).append(" already exists in base!").toString());
                 corpRepository.save(CorpMapper.INSTANCE.toModel(corpDTO.get(i)));
             }
             return CompletableFuture.completedFuture(null);
@@ -94,7 +95,7 @@ public class AdminService {
                         .INSTANCE
                         .toDto(corpRepository
                                 .getCorpByCorpId(corpId)
-                                .orElseThrow(() -> new NoSuchShopException("No corp with " + corpId + " was found in DB!"))
+                                .orElseThrow(() -> new NoSuchShopException(new StringBuilder().append("No corp with ").append(corpId).append(" was found in DB!")))
                         )
                 );
     }
@@ -176,8 +177,13 @@ public class AdminService {
     @Async
     @Transactional
     public CompletableFuture<List<ShopInfoCacheDTO>> saveShop(List<AddShopDTO> addShopDTO) {
+        log.info(addShopDTO
+                .stream()
+                .map(AddShopDTO::toString)
+                .collect(Collectors.joining("\n")));
         boolean flag = false;
         List<ShopInfoCacheDTO> result = new ArrayList<>();
+        List<Shops> shopsResult = new ArrayList<>();
         try {
             for (int i = 0; i < addShopDTO.size(); i++) {
                 Optional<Shops> exceptionShop = shopRepository.getShopByShopId(addShopDTO.get(i).getShopId());
@@ -189,12 +195,17 @@ public class AdminService {
                         .shopId(addShopDTO.get(i).getShopId())
                         .password(addShopDTO.get(i).getPassword())
                         .corpId(addShopDTO.get(i).getCorpId())
+                        .loggedIn(false)
                         .build());
                 shop.setRole(Role.SHOP);
-                shopRepository.save(shop);
+                shopsResult.add(shop);
                 result.add(shopInfoCacheDTO);
 
             }
+            shopRepository.saveAll(shopsResult
+                    .stream()
+                    .filter(item -> item.getRole() != null)
+                    .toList());
             return CompletableFuture.completedFuture(result);
         } catch (Exception e) {
             return CompletableFuture.failedFuture(e);
@@ -261,7 +272,7 @@ public class AdminService {
     @Async
     public CompletableFuture<ShopsDTO> getShopById(String shopId) {
         ShopsDTO dto = shopMapper.toDto(shopRepository.getShopByShopId(shopId)
-                        .orElseThrow(() -> new NoSuchShopException("No shop with ID: " + shopId + " was found!")));
+                        .orElseThrow(() -> new NoSuchShopException(new StringBuilder().append("No shop with ID: ").append(shopId).append(" was found!"))));
         dto.setPassword("******");
 
         return CompletableFuture
@@ -281,7 +292,7 @@ public class AdminService {
             ShopInfoCacheDTO response = getShopInfoCacheDTOResponseEntity(shopId);
             if (response != null)
                 shopInfoCacheRepository.save(ShopInfoCachRepositoryMapper.INSTANCE.toModel(response));
-            else throw new NoSuchShopException("No shop " + shopId + " in DB Geoapteki!");
+            else throw new NoSuchShopException(new StringBuilder("No shop ").append(shopId).append(" in DB Geoapteki!"));
             return response;
         }
     }
@@ -293,7 +304,7 @@ public class AdminService {
      * @return the ShopInfoCacheDTO from the external API
      */
     public ShopInfoCacheDTO getShopInfoCacheDTOResponseEntity(String shopId) {
-        String url = "https://api.apteki.ua/get_shop/" + shopId;
+        String url = new StringBuilder().append("https://api.apteki.ua/get_shop/").append(shopId).toString();
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", "application/json");
